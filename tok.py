@@ -20,4 +20,5 @@ class TokenType(Enum):
     INTEGER = 2
     REAL = 3
     STRING = 4
-    IDENTIFIER = 5
+    OPERATOR = 5
+    IDENTIFIER = 6
