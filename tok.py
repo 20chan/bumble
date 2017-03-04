@@ -2,9 +2,15 @@ from enum import Enum
 
 
 class Token:
-    def __init__(self, code, type):
+    operators = '<>!=+-*/%^.?:;,[]{}()|'
+
+    def __init__(self, code, tok_type):
         self.code = code
-        self.type = type
+        self.type = tok_type
+
+    def __str__(self):
+        return 'Type : {}, Code : {}'\
+            .format(str(self.type).split('.')[1], self.code)
 
 
 class TokenType(Enum):
