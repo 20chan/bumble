@@ -32,7 +32,7 @@ def parse(code: str):
 def parse_token(code: str, index=0) -> (Token, int):
     current = code[index:]
     if current[0] in ' \r\n\t':
-        return Token(current[0], TokenType.NONE)
+        return Token(current[0], TokenType.NONE), 1
     if current[0] is '"':
         return parse_string(current)
     if str.isdigit(current[0]):
@@ -41,6 +41,7 @@ def parse_token(code: str, index=0) -> (Token, int):
         return parse_operator(current)
     if current[0] in Token.separators:
         return parse_separator(current)
+    return parse_identifier(current)
 
 
 def parse_string(code: str) -> (Token, int):
@@ -83,6 +84,16 @@ def parse_operator(code: str) -> (Token, int):
 
 def parse_separator(code: str) -> (Token, int):
     return Token(code[0], TokenType.SEPARATOR), 1
+
+
+def parse_identifier(code: str) -> (Token, int):
+    i = 0
+    while not Token.is_split_char(code[i]):
+        i += 1
+    if code[:i] in Token.keywords:
+        return Token(code[:i], TokenType.KEYWORD), i
+    else:
+        return Token(code[:i], TokenType.IDENTIFIER), i
 
 
 if __name__ == '__main__':

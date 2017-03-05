@@ -1,1 +1,2 @@
-++-*"\n \ttest"(+10)
+def wow(a):
+    return a + (10 ^ 2)

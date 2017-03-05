@@ -4,6 +4,7 @@ from enum import Enum
 class Token:
     separators = '.,:;[]{}()'
     operator_unit = '+-*/%^&$<>!'
+    keywords = ['def', 'return']
 
     def __init__(self, code, tok_type):
         self.code = code
@@ -12,6 +13,12 @@ class Token:
     def __str__(self):
         return 'Type : {}, Code : {}'\
             .format(str(self.type).split('.')[1], self.code)
+
+    @staticmethod
+    def is_split_char(char):
+        return char in Token.separators or \
+            char in Token.operator_unit or \
+            char in ' \r\n\t'
 
 
 class TokenType(Enum):
@@ -23,4 +30,5 @@ class TokenType(Enum):
     STRING = 4
     SEPARATOR = 5
     OPERATOR = 6
-    IDENTIFIER = 7
+    KEYWORD = 7
+    IDENTIFIER = 8
