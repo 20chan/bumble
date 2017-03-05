@@ -68,10 +68,10 @@ def parse_number(code: str) -> (Token, int):
             if result_type == TokenType.REAL:
                 return Token(None, TokenType.ERROR), i
             result_type = TokenType.REAL
-        if not str.isdigit(code[i]):
+        elif not str.isdigit(code[i]):
             break
         i += 1
-    return Token(code[:i + 1], result_type), i
+    return Token(code[:i], result_type), i
 
 
 def parse_operator(code: str) -> (Token, int):
