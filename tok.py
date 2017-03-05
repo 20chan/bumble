@@ -2,7 +2,8 @@ from enum import Enum
 
 
 class Token:
-    operators = '<>!=+-*/%^.?:;,[]{}()|'
+    separators = '.,:;[]{}()'
+    operator_unit = '+-*/%^&$<>!'
 
     def __init__(self, code, tok_type):
         self.code = code
@@ -20,5 +21,6 @@ class TokenType(Enum):
     INTEGER = 2
     REAL = 3
     STRING = 4
-    OPERATOR = 5
-    IDENTIFIER = 6
+    SEPARATOR = 5
+    OPERATOR = 6
+    IDENTIFIER = 7
