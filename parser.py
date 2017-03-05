@@ -27,6 +27,7 @@ def parse(code: str):
         index += _index
         if tok.type != TokenType.NONE:
             yield tok
+    yield Token('', TokenType.EOF)
 
 
 def parse_token(code: str, index=0) -> (Token, int):
