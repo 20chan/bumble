@@ -3,7 +3,7 @@ from enum import Enum
 
 class Token:
     separators = '.,:;[]{}()'
-    operator_unit = '+-*/%^&$<>!'
+    operator_unit = '=+-*/%^&$<>!'
     keywords = ['def', 'return']
 
     def __init__(self, code, tok_type):
