@@ -39,6 +39,8 @@ def parse_token(code: str, index=0) -> (Token, int):
         return parse_number(current)
     if current[0] in Token.operator_unit:
         return parse_operator(current)
+    if current[0] in Token.separators:
+        return parse_separator(current)
 
 
 def parse_string(code: str) -> (Token, int):
@@ -77,6 +79,10 @@ def parse_operator(code: str) -> (Token, int):
         i += 1
     # code[i]가 operator가 아니므로 i+1이 아닌 i를 리턴
     return Token(code[:i], TokenType.OPERATOR), i
+
+
+def parse_separator(code: str) -> (Token, int):
+    return Token(code[0], TokenType.SEPARATOR), 1
 
 
 if __name__ == '__main__':
