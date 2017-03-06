@@ -1,0 +1,7 @@
+var a = 1;
+func meanless(wow, very, such) {
+    while(true)
+        doge.smile();
+}
+
+meanless(a, str(a), real(a));

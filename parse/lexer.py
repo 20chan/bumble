@@ -92,7 +92,19 @@ def parse_identifier(code: str) -> (Token, int):
     while not Token.is_split_char(code[i]):
         i += 1
     if code[:i] in Token.keywords:
-        return Token(code[:i], TokenType.KEYWORD), i
+        syntax = code[:i]
+        return Token(syntax, {'if': TokenType.IF,
+                              'else': TokenType.ELSE,
+                              'match': TokenType.MATCH,
+                              'while': TokenType.WHILE,
+                              'return': TokenType.RETURN,
+                              'yield': TokenType.YIELD,
+                              'skip': TokenType.SKIP,
+                              'break': TokenType.BREAK,
+                              'var': TokenType.DECLARE_VAR,
+                              'func': TokenType.DECLARE_FUNC,
+                              'true': TokenType.TRUE,
+                              'false': TokenType.FALSE}[syntax]), i
     else:
         return Token(code[:i], TokenType.IDENTIFIER), i
 

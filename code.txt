@@ -1,4 +1,0 @@
-b = B()
-def wow(a):
-    a = (b.val++) ** (a/0.5)
-    return a + (10^2)
