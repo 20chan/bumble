@@ -4,7 +4,7 @@ from enum import Enum
 class Token:
     separators = '.,:;[]{}()'
     operator_unit = '=+-*/%^&$<>!'
-    keywords = ['def', 'return']
+    keywords = ['var', 'func', 'if', 'match', 'while', 'return', 'yield', 'skip', 'break']
 
     def __init__(self, code, tok_type):
         self.code = code
@@ -30,5 +30,15 @@ class TokenType(Enum):
     STRING = 4
     SEPARATOR = 5
     OPERATOR = 6
-    KEYWORD = 7
-    IDENTIFIER = 8
+    IDENTIFIER = 7
+    _IF = 8
+    _MATCH = 9
+    _WHILE = 10
+    _RETURN = 11
+    _YIELD = 12
+    _SKIP = 13
+    _BREAK = 14
+    _DECLARE_VAR = 15
+    _DECLARE_FUNC = 16
+    _ASSIGN = 17
+    _CALL = 18
