@@ -1,0 +1,22 @@
+var a = 1
+
+func do_nothing(b, c)
+{
+    while (a >= 5)
+    {
+        match(a)
+        {
+            1: b.meanless = c
+            2:
+            {
+                b.meanless2 = -c
+                return (2, b)
+            }
+        }
+    }
+}
+
+// Swap
+var x = 1, y = 2
+
+(x, y) = (y, x)
