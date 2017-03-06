@@ -1,4 +1,4 @@
-from tok import Token, TokenType
+from parse.tok import Token, TokenType
 
 
 def decode_escape(char: str) -> str:
@@ -20,7 +20,7 @@ def decode_escape(char: str) -> str:
     return None
 
 
-def parse(code: str):
+def tokenize(code: str):
     index = 0
     while index < len(code):
         tok, _index = parse_token(code, index=index)
@@ -101,5 +101,5 @@ if __name__ == '__main__':
     c = open('code.txt', encoding='utf-8').read()
     print('original code')
     print(c)
-    for t in parse(c):
+    for t in tokenize(c):
         print(t)
