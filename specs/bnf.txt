@@ -16,8 +16,14 @@ arg_list := "(" (identifier {"," identifier}) ")"
 assign := lexpr "=" expr;
 lexpr := (identifier | "(" lexpr ")") (("[" expr "]") | ("." identifier))*
 call := expr ";"
-expr := xor_expr ('|' xor_expr)
-xor_expr :=
+expr := xor_expr ('|' xor_expr)*
+xor_expr := and_expr ('^' and_expr)*
+and_expr := shift_expr ('&' shift_expr)*
+shift_expr := arith_expr {("<<"|">>") arith_expr}
+arith_expr := term {("+"|"-") term}
+term := factor {("*"|"/"|"%") factor}
+factor := ('+'|'-'|'~') factor|power
+power := atom_expr ['**' factor]
 atom_expr := (identifier | literal) {'(' arg_list ')' | '[' arg_list ']' | '.' identifier}
 literal := simple_literal | array_literal | dict_literal
 simple_literal  := identifier | NUMBER | STRING+ | "True" | "False"
