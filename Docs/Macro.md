@@ -1,6 +1,6 @@
 # Macro
 
-다음과 같이 (cond)[/Cond.md]문이 있습니다.
+다음과 같이 [cond](/Cond.md)문이 있습니다.
 ```python
 cond(weight height){
     weight / height ** 2 <= 18.5 then return("underweight")
