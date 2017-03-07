@@ -18,6 +18,7 @@ cond(weight height){
     bmi <= 25.0 then return("normal")
     bmi <= 30.0 then return("fat")
     otherwise then "whale"
+}
 ```
 
 `(weight / height ** 2)@bmi` 가 계산될때 bmi 에는 `weight / height ** 2`를 계산한 값이 대입됩니다.
