@@ -1,11 +1,11 @@
 # Basics
 ## Table of Contents
 - [데이터 타입](#데이터-타입)
-  - [Integers](#Integers)
-  - [Floats](#Floats)
-  - [Booleans](#Booleans)
-  - [Characters](#Characters)
-  - [Strings](#Strings)
+  - [Integers](#integers)
+  - [Floats](#floats)
+  - [Booleans](#booleans)
+  - [Characters](#characters)
+  - [Strings](#strings)
 - 연산자
   - Arithmetic
   - Boolean
