@@ -3,9 +3,9 @@
 다음과 같이 [cond](/Cond.md)문이 있습니다.
 ```python
 cond(weight height){
-    weight / height ** 2 <= 18.5 then return("underweight")
-    weight / height ** 2 <= 25.0 then return("normal")
-    weight / height ** 2 <= 30.0 then return("fat")
+    weight / height ** 2 <= 18.5 then return "underweight"
+    weight / height ** 2 <= 25.0 then return "normal"
+    weight / height ** 2 <= 30.0 then return "fat"
     otherwise then return "whale"
 }
 ```
@@ -14,9 +14,9 @@ cond(weight height){
 
 ```python
 cond(weight height){
-    (weight / height ** 2)@bmi <= 18.5 then return("underweight")
-    bmi <= 25.0 then return("normal")
-    bmi <= 30.0 then return("fat")
+    (weight / height ** 2)@bmi <= 18.5 then return "underweight"
+    bmi <= 25.0 then return "normal"
+    bmi <= 30.0 then return "fat"
     otherwise then return "whale"
 }
 ```
