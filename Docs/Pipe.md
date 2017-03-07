@@ -31,3 +31,10 @@ IO.in |> foo() |> print()
 ```python
 IO.in |> text: "Input: " ++ text |> IO.out
 ```
+
+배열은 스트림으로 사용될 수 있습니다.
+하지만 배열을 스트림으로 사용하는 경우에는 모든 원소를 차례차례 넘겨준다는 점에서 일반 스트림과 다릅니다.
+```python
+stream("This is stream") |> print() // 한 줄마다 한 글자씩 출력
+stream([1, 2, 3, 4]) |> foo() // foo(1); foo(2); foo(3); foo(4); 와 동일
+```
