@@ -3,7 +3,7 @@ var x = 1, y = 2
 x, y = y, x
 
 // Stream Flow using lambda
-IO.in > text: 'input: ' ++ text > IO.out
+IO.in |> text: 'input: ' ++ text |> IO.out
 
 // Binding
 b := a + 1 // b = 2
@@ -30,4 +30,4 @@ wow = [select x**2
        from x in [1..10]
        where x % 2 == 0]
 
-stream(wow) > IO.out // print all elements
+stream(wow) |> IO.out // print all elements
