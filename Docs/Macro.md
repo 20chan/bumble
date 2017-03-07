@@ -1,19 +1,23 @@
 # Macro
 
-다음과 같은 파이썬 코드가 있다고 합시다
+다음과 같이 (cond)[/Cond.md]문이 있습니다.
 ```python
-a = iter(range(10))
-print(next(a))
+cond(weight height){
+    weight / height ** 2 <= 18.5 then return("underweight")
+    weight / height ** 2 <= 25.0 then return("normal")
+    weight / height ** 2 <= 30.0 then return("fat")
+    otherwise then "whale"
+}
 ```
 
-이때 다음 next(a)를 호출하면 그 전의 값은 알 수 없습니다. 그래서 우리는 다음과 같이 변수를 선언해서 쓰죠:
+`weight / height ** 2`가 반복되어 사용되어지는건 바람직하지 않습니다!
+
 ```python
-cur = next(a)
-print(cur)
+cond(weight height){
+    (weight / height ** 2)@bmi <= 18.5 then return("underweight")
+    bmi <= 25.0 then return("normal")
+    bmi <= 30.0 then return("fat")
+    otherwise then "whale"
 ```
 
-이를 인라인으로 선언하면
-```python
-print(next(a)@cur)
-```
-가 됩니다.
+`(weight / height ** 2)@bmi` 가 계산될때 bmi 에는 `weight / height ** 2`를 계산한 값이 대입됩니다.
