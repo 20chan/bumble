@@ -1,4 +1,4 @@
-# SUPA FAST DECLARATION
+# Inline Declaration
 
 다음과 같이 [cond](/Cond.md)문이 있습니다.
 ```python
