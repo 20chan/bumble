@@ -7,10 +7,10 @@
   - [Characters](#characters)
   - [Strings](#strings)
 - 연산자
-  - Arithmetic
-  - Boolean
-  - Comparison
-  - List
+  - [Arithmetic](#arithmetic)
+  - [Boolean](#boolean)
+  - [Comparison](#comparison)
+  - [List](#list)
 
 ## 데이터 타입
 ### Integers
@@ -48,3 +48,19 @@ print('死')
 print("This is STRING!")
 print("死死死死死死死死死")
 ```
+
+## 연산자
+### Arithmetic
+기본적인 사칙연산 연산자 `+`, `-`, `*`, `/` 가 있고 나머지 연산인 `%`과 거듭제곱 연산 `**`가 있습니다.
+연산 우선순위는 `(**) > (*) = (/) = (%) > (+) = (-)` 입니다.
+
+### Boolean
+부울 연산에 and or not xor 말고 뭐가 있겠어요 ㅇㅅㅇ
+and 연산자는 `&&`, or 연산자는 `||`, not 연산자는 `!`, xor 연산자는 `^` 입니다.
+각 연산자는 정수형 변수에도 똑같이 적용됩니다.
+
+### Comparison
+비교 연산자 `>`, `<`, `>=`, `<=`, `==`, `!=` 가 있습니다.
+
+### List
+리스트(문자열 포함) 연산자에는 리스트를 이어 붙이는 `++` 연산자가 있습니다.
