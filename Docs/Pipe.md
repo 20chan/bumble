@@ -29,7 +29,7 @@ IO.in |> foo() |> print()
 ```
 이는 람다를 사용하여 더 멋있는 코드를 작성할 수 있습니다.
 ```python
-IO.in |> text: "Input: " ++ text |> IO.out
+IO.in |> text => "Input: " ++ text |> IO.out
 ```
 
 배열은 스트림으로 사용될 수 있습니다.

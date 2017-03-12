@@ -3,7 +3,7 @@ var x = 1, y = 2
 x, y = y, x
 
 // Stream Flow using lambda
-IO.in |> text: 'input: ' ++ text |> IO.out
+IO.in |> text => 'input: ' ++ text |> IO.out
 
 // Binding
 b := a + 1 // b = 2
@@ -13,9 +13,9 @@ a = 5 // b = 6
 do(c) := do_nothing(1, c)
 
 match(x, y) {
-    3, _ : return 5;
-    _, 5 : return 3;
-    _, _ : return Nothing;
+    3, _ then return 5;
+    _, 5 then return 3;
+    _, _ then return Nothing;
 }
 
 // Before

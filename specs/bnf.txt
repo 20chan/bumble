@@ -1,4 +1,4 @@
-program = sentence*
+program := sentence*
 sentence := if | match | while | return | yield | skip | break | declare_var | declare_func | assign | call
 sentences := ("{" {sentence}* "}" | sentence)
 if := "if" "(" expr ")" sentences
