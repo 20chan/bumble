@@ -1,7 +1,17 @@
-<sentence> := <if> | <while> | <for> | <try> | <funcdef> | <enumdef> | <vardef>
+<statement> := (<sentence> | "{" <sentence>* "}")
+<sentence> := <if> | <while> | <for> | <try> | <funcdef> | <enumdef> | <vardef> | <bind> | <call>
 
+<if> := "if" "(" <expr> ")" <statement>
+        ("else" "if" "(" <expr> ")" <statement>)*
+        ("else" <statement>)?
+<while> := "while" "(" <expr> ")" <statement>
+<for> := "for" "(" (<expr> ";" <expr> ";" <expr> | "var" IDENTIFIER "in" <expr>) ")" <statement>
+<try> := "try" "{" <sentence>* "}"
+         ("catch" (<expr> IDENTIFIER?)? "{" <sentence>* "}")*
+         ("finally" "{" <sentence>* "}")?
 <funcdef> := "func" IDENTIFIER "(" <expr_list> ")" "{" <sentence>* "}"
 <vardef> := "var" IDENTIFIER ("=" <expr>)? ";"
+<bind> := IDENTIFIER ":=" <expr>
 
 <call> := <expr> ";"
 <expr> := <or_expr> | <lambdef>
