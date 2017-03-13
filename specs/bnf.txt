@@ -1,7 +1,7 @@
-<sentence> := <if> | <while> | <for> | <try> | <funcdef> | <vardef>
+<sentence> := <if> | <while> | <for> | <try> | <funcdef> | <enumdef> | <vardef>
 
-<funcdef> := "func"
-<vardef> := "var" IDENTIFIER ("=" <expr>)?
+<funcdef> := "func" IDENTIFIER "(" <expr_list> ")" "{" <sentence>* "}"
+<vardef> := "var" IDENTIFIER ("=" <expr>)? ";"
 
 <call> := <expr> ";"
 <expr> := <or_expr> | <lambdef>
