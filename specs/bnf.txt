@@ -17,7 +17,7 @@
 <factor> := ("+" | "-") <factor> | <power>
 <power> := <atom_expr> ["**" <factor>] <trailer>*
 <atom_expr> := <tuple> | <list> | <map>
-            IDENTIFIER | NUMBER | STRING | NONE | TRUE | FALSE
+            IDENTIFIER | NUMBER | STRING | NOTHING | TRUE | FALSE
 
 <tuple> := "(" <expr_list> ")"
 <list> := "[" (<linq> | <comp> | <notation> | <expr_list>)*) "]"
@@ -28,7 +28,7 @@
                 "where" <expr>
 <comp> := <expr> "for" <expr_list> "in" <expr>
 <notation> := <arith_expr> ".." <arith_expr> ("by" <arith_expr>)?
-<map> := ()
+<map> := (<expr> ":" <expr>)*
 
 <trailer> := ("(" <expr_list> ")") | ("[" <expr_list> "]") | "." IDENTIFIER
 <expr_list> := <expr> ("," <expr>)*
