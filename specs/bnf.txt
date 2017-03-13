@@ -16,18 +16,19 @@
 <term> := <factor> (("*" | "/" | "%") <factor>)*
 <factor> := ("+" | "-") <factor> | <power>
 <power> := <atom_expr> ["**" <factor>] <trailer>*
-<atom_expr> := <tuple> | <list> | <dict>
+<atom_expr> := <tuple> | <list> | <map>
             IDENTIFIER | NUMBER | STRING | NONE | TRUE | FALSE
 
 <tuple> := "(" <expr_list> ")"
-<list> := "[" (<linq> | <comp> | <expr_list>)*) "]"
+<list> := "[" (<linq> | <comp> | <notation> | <expr_list>)*) "]"
 <linq> := <linq_query>+
 <linq_query> := "select" <expr> |
                 "from" <expr> "in" <expr> |
                 "orderby" <expr> ("ascending" | "descending")? |
                 "where" <expr>
 <comp> := <expr> "for" <expr_list> "in" <expr>
-<dict> := ()
+<notation> := <arith_expr> ".." <arith_expr> ("by" <arith_expr>)?
+<map> := ()
 
 <trailer> := ("(" <expr_list> ")") | ("[" <expr_list> "]") | "." IDENTIFIER
 <expr_list> := <expr> ("," <expr>)*
