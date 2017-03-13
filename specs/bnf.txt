@@ -1,5 +1,11 @@
+<sentence> := <if> | <while> | <for> | <try> | <funcdef> | <vardef>
+
+<funcdef> := "func"
+<vardef> := "var" IDENTIFIER ("=" <expr>)?
+
 <call> := <expr> ";"
-<expr> := <or_expr> | <lambda>
+<expr> := <or_expr> | <lambdef>
+<lambdef> := <expr_list> "=>" <expr> | "{" <sentence>* "}"
 <or_expr> := <and_expr> ("||" <and_expr>)*
 <and_expr> := <xor_expr> ("&&" <xor_expr>)*
 <xor_expr> := <shift_expr> ("^" <shift_expr>)*
@@ -7,15 +13,21 @@
 <cmd_expr> := <list_expr> (("<" | ">" | "==" | "<=" | ">=" | "!=") <list_expr>)?
 <list_expr> := (<expr> ":")* <arith_expr> ("++" <arith_expr>)* (":" <expr>)*
 <arith_expr> := <term> (("+" | "-") <term>)*
-<term> := ("+" | "-") <factor> | <power>
-<power> := <atom_expr> <trailer>*
+<term> := <factor> (("*" | "/" | "%") <factor>)*
+<factor> := ("+" | "-") <factor> | <power>
+<power> := <atom_expr> ["**" <factor>] <trailer>*
 <atom_expr> := <tuple> | <list> | <dict>
             IDENTIFIER | NUMBER | STRING | NONE | TRUE | FALSE
 
 <tuple> := "(" <expr_list> ")"
 <list> := "[" (<linq> | <comp> | <expr_list>)*) "]"
-<linq> := "FUCK THIS SHIT"
+<linq> := <linq_query>+
+<linq_query> := "select" <expr> |
+                "from" <expr> "in" <expr> |
+                "orderby" <expr> ("ascending" | "descending")? |
+                "where" <expr>
 <comp> := <expr> "for" <expr_list> "in" <expr>
+<dict> := ()
 
 <trailer> := ("(" <expr_list> ")") | ("[" <expr_list> "]") | "." IDENTIFIER
 <expr_list> := <expr> ("," <expr>)*
