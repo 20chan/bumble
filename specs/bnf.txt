@@ -26,7 +26,7 @@
                 "from" <expr> "in" <expr> |
                 "orderby" <expr> ("ascending" | "descending")? |
                 "where" <expr>
-<comp> := <expr> "for" <expr_list> "in" <expr>
+<comp> := <expr> "for" <expr_list> "in" <expr> ("if" <expr>)?
 <notation> := <arith_expr> ".." <arith_expr> ("by" <arith_expr>)?
 <map> := (<expr> ":" <expr>)*
 

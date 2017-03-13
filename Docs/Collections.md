@@ -21,7 +21,7 @@ c = [select x
      where isprime(x)]
 
 // List comprehension
-[x for x in [1..10]].filter(x => isprime(x))
+[x for x in [1..10] if isprime(x)]
 ```
 
 # Tuples
