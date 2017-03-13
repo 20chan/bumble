@@ -1,0 +1,21 @@
+<call> := <expr> ";"
+<expr> := <or_expr> | <lambda>
+<or_expr> := <and_expr> ("||" <and_expr>)*
+<and_expr> := <xor_expr> ("&&" <xor_expr>)*
+<xor_expr> := <shift_expr> ("^" <shift_expr>)*
+<shift_expr> := <cmd_expr> (("<<" | ">>") <cmd_expr>)*
+<cmd_expr> := <list_expr> (("<" | ">" | "==" | "<=" | ">=" | "!=") <list_expr>)?
+<list_expr> := (<expr> ":")* <arith_expr> ("++" <arith_expr>)* (":" <expr>)*
+<arith_expr> := <term> (("+" | "-") <term>)*
+<term> := ("+" | "-") <factor> | <power>
+<power> := <atom_expr> <trailer>*
+<atom_expr> := <tuple> | <list> | <dict>
+            IDENTIFIER | NUMBER | STRING | NONE | TRUE | FALSE
+
+<tuple> := "(" <expr_list> ")"
+<list> := "[" (<linq> | <comp> | <expr_list>)*) "]"
+<linq> := "FUCK THIS SHIT"
+<comp> := <expr> "for" <expr_list> "in" <expr>
+
+<trailer> := ("(" <expr_list> ")") | ("[" <expr_list> "]") | "." IDENTIFIER
+<expr_list> := <expr> ("," <expr>)*
