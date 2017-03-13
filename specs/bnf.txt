@@ -1,21 +1,24 @@
 <statement> := (<sentence> | "{" <sentence>* "}")
-<sentence> := <if> | <while> | <for> | <try> | <enumdef> | <funcdef> | <vardef> | <bind> | <call>
+<sentence> := <if> | <while> | <for> | <cond> | <match> | <try> | <enumdef> | <funcdef> | <vardef> | <bind> | <call>
 
 <if> := "if" "(" <expr> ")" <statement>
         ("else" "if" "(" <expr> ")" <statement>)*
         ("else" <statement>)?
 <while> := "while" "(" <expr> ")" <statement>
+<cond> := "cond" "(" <expr> ")" "{" (<expr> "then" <statement>)* ("otherwise" <statement>)? "}"
+<match> := "match" "(" <expr_list> ")" "{" (<literal_type> "then" <statement>)* "}"
+<literal_type> := LITERAL | "_"
 <for> := "for" "(" (<expr> ";" <expr> ";" <expr> | "var" IDENTIFIER "in" <expr>) ")" <statement>
 <try> := "try" "{" <sentence>* "}"
          ("catch" (<expr> IDENTIFIER?)? "{" <sentence>* "}")*
          ("finally" "{" <sentence>* "}")?
-<enumdef> := "enum" IDENTIFIER "{" (IDENTIFIER "=" LITERAL)* "}"
+<enumdef> := "enum" IDENTIFIER "{" IDENTIFIER "=" LITERAL ("," IDENTIFIER "=" LITERAL)*"}"
 <funcdef> := "func" IDENTIFIER "(" <expr_list> ")" "{" <sentence>* "}"
 <vardef> := "var" IDENTIFIER ("=" <expr>)? ";"
 <bind> := IDENTIFIER ":=" <expr>
 
 <call> := <expr> ";"
-<expr> := <or_expr> | <lambdef>
+<expr> := <or_expr> ("|>" <or_expr>)? | <lambdef>
 <lambdef> := <expr_list> "=>" <expr> | "{" <sentence>* "}"
 <or_expr> := <and_expr> ("||" <and_expr>)*
 <and_expr> := <xor_expr> ("&&" <xor_expr>)*
