@@ -36,7 +36,7 @@ print(false);
 ### Characters
 문자는 기본적으로 utf-8 유니코드 인코딩을 사용합니다. 따옴표로 감싸서 한글자의 문자를 나타냅니다.
 ```python
-print('c'.type())
+print('c'.type()) // 'char'
 print('뷁')
 print('死')
 ```
