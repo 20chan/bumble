@@ -3,14 +3,15 @@ from enum import Enum
 
 class Token:
     separators = '.,:;[]{}()'
-    operator_unit = '=+-*/%^&$<>!'
-    keywords = ['var', 'func', 'if', 'else', 'match', 'while', 'return', 'yield', 'skip', 'break', 'true', 'false']
+    operator_unit = '=+-*/%^&$|<>!'
+    keywords = ['var', 'func', 'if', 'else', 'cond', 'then', 'match', 'while',
+                'return', 'yield', 'skip', 'break', 'none', 'true', 'false']
 
     def __init__(self, code, tok_type):
         self.code = code
         self.type = tok_type
 
-    def __str__(self):
+    def __repr__(self):
         return 'Type : {}, Code : {}'\
             .format(str(self.type).split('.')[1], self.code)
 
