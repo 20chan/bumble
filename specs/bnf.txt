@@ -1,14 +1,16 @@
 <statement> := (<sentence> | "{" <sentence>* "}")
+<loop_sentence> := <sentence> | "skip" <expr>? ";" | "break" ";" |
+<loop_statement> := (<loop_sentence> | "{" <loop_sentence>* "}"
 <sentence> := <if> | <while> | <for> | <cond> | <match> | <try> | <enumdef> | <classdef> | <funcdef> | <vardef> | <bind> | <call>
 
 <if> := "if" "(" <expr> ")" <statement>
         ("else" "if" "(" <expr> ")" <statement>)*
         ("else" <statement>)?
-<while> := "while" "(" <expr> ")" <statement>
+<while> := "while" "(" <expr> ")" <loop_statement>
+<for> := "for" "(" (<expr> ";" <expr> ";" <expr> | "var" IDENTIFIER "in" <expr>) ")" <loop_statement>
 <cond> := "cond" "(" <expr> ")" "{" (<expr> "then" <statement>)* ("otherwise" <statement>)? "}"
 <match> := "match" "(" <expr_list> ")" "{" (<literal_type> "then" <statement>)* "}"
 <literal_type> := LITERAL | "_"
-<for> := "for" "(" (<expr> ";" <expr> ";" <expr> | "var" IDENTIFIER "in" <expr>) ")" <statement>
 <try> := "try" "{" <sentence>* "}"
          ("catch" (<expr> IDENTIFIER?)? "{" <sentence>* "}")*
          ("finally" "{" <sentence>* "}")?
