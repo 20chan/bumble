@@ -32,6 +32,8 @@ def tokenize(code: str):
 
 def parse_token(code: str, index=0) -> (Token, int):
     current = code[index:]
+    if current[0] is '/':
+        return parse_comment(current)
     if current[0] in ' \r\n\t':
         return Token(current[0], TokenType.NONE), 1
     if current[0] is '"':
@@ -43,6 +45,21 @@ def parse_token(code: str, index=0) -> (Token, int):
     if current[0] in Token.separators:
         return parse_separator(current)
     return parse_identifier(current)
+
+
+def parse_comment(code: str) -> (Token, int):
+    if not code[1] in '/*':
+        return Token('', TokenType.NONE), 0
+    if code[1] == '/':
+        i = 2
+        while i < len(code) and code[i] != '\n':
+            i += 1
+        return Token('', TokenType.NONE), i
+    if code[1] == '*':
+        i = 2
+        while i < len(code) - 1 and code[i:i+2] != '*/':
+            i += 1
+        return Token('', TokenType.NONE), i+2
 
 
 def parse_string(code: str) -> (Token, int):
