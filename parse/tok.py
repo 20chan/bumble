@@ -5,7 +5,7 @@ class Token:
     separators = '.,:;[]{}()'
     operator_unit = '=+-*/%^&$|<>!'
     keywords = ['var', 'func', 'if', 'else', 'cond', 'then', 'match', 'while', 'for', 'in'
-                'return', 'yield', 'skip', 'break', 'none', 'true', 'false']
+                'return', 'yield', 'skip', 'break', 'nothing', 'true', 'false']
 
     def __init__(self, code, tok_type):
         self.code = code
@@ -50,3 +50,6 @@ class TokenType(Enum):
     CLASS = 23
     CALL = 24
     BIND = 25
+    NOTHING = 26
+    THEN = 27
+    IN = 28

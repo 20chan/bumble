@@ -1,14 +1,21 @@
+
+/*
 var a = 1;
 func meanless(wow, very, such) {
     while(true)
         doge.smile();
 }
-
+*/
 meanless(a, str(a), real(a));
 
-a = "yeah"
-cond(a) {
-    a.startswith("y") then print("yes");
+var a = "yeah";
+cond(a) { // WOW VERY SUCH DOGE
+    a.startswith("y") then "yes" |> print(); // SUCH AMAZING
     a.startswith("m") then print("nooo");
     otherwise print(";ㅅ;");
 }
+
+var a = {1:10, 2:20, 3:30, "s":None}
+print(a[1]) // 10
+a["s"] = 40
+print(a["s"]) // 40
