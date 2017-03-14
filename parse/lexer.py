@@ -94,6 +94,8 @@ def parse_number(code: str) -> (Token, int):
 
 def parse_operator(code: str) -> (Token, int):
     i = 0
+    if code[0] == ':' and code[1] != '=':
+        return parse_separator(code)
     while code[i] in Token.operator_unit:
         i += 1
     # code[i]가 operator가 아니므로 i+1이 아닌 i를 리턴

@@ -3,7 +3,7 @@ from enum import Enum
 
 class Token:
     separators = '.,:;[]{}()'
-    operator_unit = '=+-*/%^&$|<>!'
+    operator_unit = ':=+-*/%^&$|<>!'
     keywords = ['var', 'func', 'if', 'else', 'cond', 'then', 'match', 'while', 'for', 'in'
                 'return', 'yield', 'skip', 'break', 'nothing', 'true', 'false']
 

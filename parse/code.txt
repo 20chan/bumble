@@ -19,3 +19,18 @@ var a = {1:10, 2:20, 3:30, "s":None}
 print(a[1]) // 10
 a["s"] = 40
 print(a["s"]) // 40
+
+var println = text => print(text ++ "\n")
+
+var bar(arg1) := foo(1, 2, arg1)
+print(bar(5))
+
+match(a, b) {
+    _, _ then return -1;
+}
+
+class A : B
+{
+    func do() {
+    }
+}
