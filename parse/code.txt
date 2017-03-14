@@ -5,3 +5,10 @@ func meanless(wow, very, such) {
 }
 
 meanless(a, str(a), real(a));
+
+a = "yeah"
+cond(a) {
+    a.startswith("y") then print("yes");
+    a.startswith("m") then print("nooo");
+    otherwise print(";ㅅ;");
+}

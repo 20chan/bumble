@@ -8,12 +8,12 @@ func foo(a, b, c){
     return something;
 }
 
-bar = foo(1, 2)
+var bar = foo(1, 2)
 bar(3) // bar(3) = foo(1, 2)(3) = foo(1, 2, 3)
 ```
 
 바인딩을 사용하여 다음과 같이 작성할 수도 있습니다.
 ```python
-bar(c) := foo(1, 2, c)
+var bar(c) := foo(1, 2, c)
 bar(3) // bar(3) = foo(1, 2, 3)
 ```
