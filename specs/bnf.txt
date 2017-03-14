@@ -1,5 +1,5 @@
 <statement> := (<sentence> | "{" <sentence>* "}")
-<sentence> := <if> | <while> | <for> | <cond> | <match> | <try> | <enumdef> | <funcdef> | <vardef> | <bind> | <call>
+<sentence> := <if> | <while> | <for> | <cond> | <match> | <try> | <enumdef> | <classdef> | <funcdef> | <vardef> | <bind> | <call>
 
 <if> := "if" "(" <expr> ")" <statement>
         ("else" "if" "(" <expr> ")" <statement>)*
@@ -13,6 +13,7 @@
          ("catch" (<expr> IDENTIFIER?)? "{" <sentence>* "}")*
          ("finally" "{" <sentence>* "}")?
 <enumdef> := "enum" IDENTIFIER "{" IDENTIFIER "=" LITERAL ("," IDENTIFIER "=" LITERAL)*"}"
+<classdef> := "class" IDENTIFIER (":" IDENTIFIER)? "{" (<funcdef> | <vardef> | <bind>)* "}"
 <funcdef> := "func" IDENTIFIER "(" <expr_list> ")" "{" <sentence>* "}"
 <vardef> := "var" IDENTIFIER ("=" <expr>)? ";"
 <bind> := IDENTIFIER ":=" <expr>
