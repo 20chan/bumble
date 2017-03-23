@@ -7,5 +7,5 @@ var users_childs = [select childs
                 from x in users
                 let childs = x.childs
                 where x.alive == true
-                orderby x.age]
+                orderby x.age];
 ```
