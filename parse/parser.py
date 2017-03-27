@@ -1,6 +1,6 @@
-from parse import AST
 from parse.lexer import tokenize
 from parse.tok import TokenType
+import parse.AST.Node as Node
 
 
 class Parser:
@@ -9,23 +9,36 @@ class Parser:
         self.lex = iter(tokenize(code))
         self.current_tok = next(self.lex)
 
-    @staticmethod
-    def error():
-        raise Exception('Invalid syntax')
+    def next_tok(self):
+        self.current_tok = next(self.lex)
+        return self.current_tok
 
-    def eat(self, tok_type: TokenType):
-        if self.current_tok == tok_type:
-            self.current_tok = next(self.lex)
+    def parse(self) -> Node.Node:
+        return self.parse_sentence()
+
+    def parse_sentence(self) -> Node.Sentence:
+        if self.next_tok().TokenType == TokenType.IF:
+            return self.parse_if()
+
+    def parse_block(self) -> [Node.Sentence]:
+        res = []
+        while self.current_tok != "}":
+            res.append(self.parse_sentence())
+        return res
+
+    def parse_statement(self) -> Node.Statement:
+        if self.next_tok().code == "{":
+            return Node.Statement(self.parse_block())
         else:
-            Parser.error()
+            return Node.Statement(self.parse_sentence())
 
-    def parse(self) -> AST.AST:
-        node = self.sentence()
-        try:
-            while True:
-                self.sentence()
-        except StopIteration:
-            return node
+    def parse_if(self):
+        cond = self.parse_expr()
+        true_block, false_block = None, None
+        true_block = self.parse_statement()
+        if self.next_tok().TokenType == TokenType.ELSE:
+            false_block = self.parse_statement()
+        return Node.StateIf(cond, true_block, false_block)
 
-    def sentence(self) -> AST.AST:
+    def parse_expr(self) -> Node.Expression:
         pass
