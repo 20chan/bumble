@@ -27,10 +27,10 @@ var c = [select x
 리스트의 원소는 리스트의 선언시 원소의 앞에 `&`를 붙여 변수의 레퍼런스가 될 수 있습니다.
 예를 들어, 다음과 같은 코드는 10을 출력합니다.
 ```python
-var a = 5
-var ref_list = [&a, 1, 2]
-ref_list[0] *= 2
-print(a)
+var a = 5;
+var ref_list = [&a, 1, 2];
+ref_list[0] *= 2;
+print(a);
 ```
 
 # Tuples
