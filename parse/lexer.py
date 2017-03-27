@@ -2,22 +2,17 @@ from parse.tok import Token, TokenType
 
 
 def decode_escape(char: str) -> str:
-    if char == '\\':
-        return '\\'
-    if char == 'n':
-        return '\n'
-    if char == 't':
-        return '\t'
-    if char == 'r':
-        return '\r'
-    if char == '\'':
-        return '\''
-    if char == '"':
-        return '"'
-    if char == '0':
-        return '\0'
+    switch_map = {
+        '\\': '\\',
+        'n': '\n',
+        't': '\t',
+        'r': '\r',
+        '\'': '\'',
+        '"':  '"',
+        '0': '\0'
+    }
 
-    return None
+    return switch_map.get(char)
 
 
 def tokenize(code: str):
@@ -32,17 +27,19 @@ def tokenize(code: str):
 
 def parse_token(code: str, index=0) -> (Token, int):
     current = code[index:]
-    if current[0] is '/':
+    cur = current[0]
+
+    if cur is '/':
         return parse_comment(current)
-    if current[0] in ' \r\n\t':
-        return Token(current[0], TokenType.NONE), 1
-    if current[0] is '"':
+    if cur in ' \r\n\t':
+        return Token(cur, TokenType.NONE), 1
+    if cur is '"':
         return parse_string(current)
-    if str.isdigit(current[0]):
+    if str.isdigit(cur):
         return parse_number(current)
-    if current[0] in Token.operator_unit:
+    if cur in Token.operator_unit:
         return parse_operator(current)
-    if current[0] in Token.separators:
+    if cur in Token.separators:
         return parse_separator(current)
     return parse_identifier(current)
 
