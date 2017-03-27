@@ -34,10 +34,13 @@ class Parser:
 
     def parse_if(self):
         cond = self.parse_expr()
-        true_block, false_block = None, None
         true_block = self.parse_statement()
+
         if self.next_tok().TokenType == TokenType.ELSE:
             false_block = self.parse_statement()
+        else:
+            false_block = None
+
         return Node.StateIf(cond, true_block, false_block)
 
     def parse_expr(self) -> Node.Expression:
