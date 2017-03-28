@@ -22,7 +22,7 @@ class Parser:
 
     def parse_block(self) -> [Node.Sentence]:
         res = []
-        while self.current_tok != "}":
+        while self.next_tok() != "}":
             res.append(self.parse_sentence())
         return res
 
