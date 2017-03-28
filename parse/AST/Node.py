@@ -44,3 +44,17 @@ class LambdaDef(Expression):
     def __init__(self, exprs, block):
         self.exprs = exprs
         self.block = block
+
+
+class NodeLiteral(Expression):
+    def __init__(self, val):
+        self.val = val
+
+class NodeInteger(NodeLiteral):
+    def __init__(self, val):
+        NodeLiteral.__init__(self, val)
+
+
+class NodeID(Expression):
+    def __init__(self, id):
+        self.id = id
