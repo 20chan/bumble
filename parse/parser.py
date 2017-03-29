@@ -19,6 +19,27 @@ class Parser:
     def parse_sentence(self) -> Node.Sentence:
         if self.next_tok().TokenType == TokenType.IF:
             return self.parse_if()
+        if self.next_tok().TokenType == TokenType.WHILE:
+            return self.parse_while()
+        if self.next_tok().TokenType == TokenType.FOR:
+            return self.parse_for()
+        if self.next_tok().TokenType == TokenType.COND:
+            return self.parse_cond()
+        if self.next_tok().TokenType == TokenType.MATCH:
+            return self.parse_match()
+        if self.next_tok().TokenType == TokenType.TRY:
+            return self.parse_try()
+        if self.next_tok().TokenType == TokenType.ENUM:
+            return self.parse_enum()
+        if self.next_tok().TokenType == TokenType.CLASS:
+            return self.parse_class()
+        if self.next_tok().TokenType == TokenType.FUNC:
+            return self.parse_func()
+        if self.next_tok().TokenType == TokenType.VAR:
+            return self.parse_var()
+        if self.next_tok().TokenType == TokenType.IDENTIFIER:
+
+
 
     def parse_block(self) -> [Node.Sentence]:
         res = []

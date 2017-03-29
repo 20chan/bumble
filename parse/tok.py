@@ -53,3 +53,7 @@ class TokenType(Enum):
     NOTHING = 26
     THEN = 27
     IN = 28
+    TRY = 29
+    CATCH = 30
+    FINALLY = 31
+    ENUM = 32

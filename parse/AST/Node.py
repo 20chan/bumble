@@ -50,6 +50,7 @@ class NodeLiteral(Expression):
     def __init__(self, val):
         self.val = val
 
+
 class NodeInteger(NodeLiteral):
     def __init__(self, val):
         NodeLiteral.__init__(self, val)
