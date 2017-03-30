@@ -48,8 +48,9 @@ class Parser:
     def parse_block(self) -> [Node.Sentence]:
         res = []
         self.check_pop('{')
-        while self.pop_tok() != "}":
+        while self.top != "}":
             res.append(self.parse_sentence())
+        self.check_pop('}')
         return res
 
     def parse_statement(self) -> Node.Statement:

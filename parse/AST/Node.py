@@ -27,9 +27,9 @@ class StateIf(Sentence):
 
 
 class StateWhile(Sentence):
-    def __init__(self, cond, loop):
+    def __init__(self, cond, block):
         self.cond = cond
-        self.loop = loop
+        self.block = block
 
 
 class StateFor(Sentence):
