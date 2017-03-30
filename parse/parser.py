@@ -1,54 +1,55 @@
 from parse.lexer import tokenize
-from parse.tok import TokenType
+from parse.tok import Token, TokenType
 import parse.AST.Node as Node
 
 
 class Parser:
     def __init__(self, code: str):
         self.code = code
-        self.lex = iter(tokenize(code))
-        self.current_tok = next(self.lex)
+        self._toks = list(tokenize(code))
 
-    def next_tok(self):
-        self.current_tok = next(self.lex)
-        return self.current_tok
+    def pop_tok(self):
+        return self._toks.pop()
+
+    @property
+    def top(self) -> Token:
+        return self._toks[0]
 
     def parse(self) -> Node.Node:
         return self.parse_sentence()
 
     def parse_sentence(self) -> Node.Sentence:
-        if self.next_tok().TokenType == TokenType.IF:
+        if self.top.type == TokenType.IF:
             return self.parse_if()
-        if self.next_tok().TokenType == TokenType.WHILE:
+        if self.top.type == TokenType.WHILE:
             return self.parse_while()
-        if self.next_tok().TokenType == TokenType.FOR:
+        if self.top.type == TokenType.FOR:
             return self.parse_for()
-        if self.next_tok().TokenType == TokenType.COND:
+        if self.top.type == TokenType.COND:
             return self.parse_cond()
-        if self.next_tok().TokenType == TokenType.MATCH:
+        if self.top.type == TokenType.MATCH:
             return self.parse_match()
-        if self.next_tok().TokenType == TokenType.TRY:
+        if self.top.type == TokenType.TRY:
             return self.parse_try()
-        if self.next_tok().TokenType == TokenType.ENUM:
+        if self.top.type == TokenType.ENUM:
             return self.parse_enum()
-        if self.next_tok().TokenType == TokenType.CLASS:
+        if self.top.type == TokenType.CLASS:
             return self.parse_class()
-        if self.next_tok().TokenType == TokenType.FUNC:
+        if self.top.type == TokenType.FUNC:
             return self.parse_func()
-        if self.next_tok().TokenType == TokenType.VAR:
+        if self.top.type == TokenType.VAR:
             return self.parse_var()
-        if self.next_tok().TokenType == TokenType.IDENTIFIER:
-
-
+        if self.top.type == TokenType.IDENTIFIER:
+            return self.parse_id()
 
     def parse_block(self) -> [Node.Sentence]:
         res = []
-        while self.next_tok() != "}":
+        while self.pop_tok() != "}":
             res.append(self.parse_sentence())
         return res
 
     def parse_statement(self) -> Node.Statement:
-        if self.next_tok().code == "{":
+        if self.pop_tok().code == "{":
             return Node.Statement(self.parse_block())
         else:
             return Node.Statement(self.parse_sentence())
@@ -57,7 +58,7 @@ class Parser:
         cond = self.parse_expr()
         true_block = self.parse_statement()
 
-        if self.next_tok().TokenType == TokenType.ELSE:
+        if self.pop_tok().TokenType == TokenType.ELSE:
             false_block = self.parse_statement()
         else:
             false_block = None
@@ -65,4 +66,22 @@ class Parser:
         return Node.StateIf(cond, true_block, false_block)
 
     def parse_expr(self) -> Node.Expression:
+        pass
+
+    def parse_id(self) -> Node.Expression:
+        identifier = self.pop_tok()
+        if self.top.code == '=':
+            return self.parse_assign(identifier)
+        if self.top.type == TokenType.BIND:
+            return self.parse_bind(identifier)
+        if self.top.code == '(':
+            return self.parse_call(identifier)
+
+    def parse_assign(self, ide) -> Node.NodeAssign:
+        pass
+
+    def parse_bind(self, ide) -> Node.NodeBind:
+        pass
+
+    def parse_call(self, ide) -> Node.NodeCall:
         pass

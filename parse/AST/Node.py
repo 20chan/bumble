@@ -56,6 +56,19 @@ class NodeInteger(NodeLiteral):
         NodeLiteral.__init__(self, val)
 
 
-class NodeID(Expression):
-    def __init__(self, id):
-        self.id = id
+class NodeAssign(Expression):
+    def __init__(self, ide, exp=None):
+        self.id = ide
+        self.exp = exp
+
+
+class NodeBind(Expression):
+    def __init__(self, ide, exp):
+        self.ide = ide
+        self.exp = exp
+
+
+class NodeCall(Expression):
+    def __init__(self, exp, *args):
+        self.exp = exp
+        self.args = args
