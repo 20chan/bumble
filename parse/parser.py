@@ -59,7 +59,7 @@ class Parser:
             return Node.Statement(self.parse_sentence())
 
     def parse_if(self):
-        self.check_pop('while')
+        self.check_pop('if')
         self.check_pop('(')
         cond = self.parse_expr()
         self.check_pop(')')
