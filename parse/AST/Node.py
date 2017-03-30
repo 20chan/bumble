@@ -53,7 +53,32 @@ class StateMatch(Sentence):
         self.states = states
 
 
-class LambdaDef(Expression):
+class StateTry(Sentence):
+    def __init__(self, try_, catch_, finally_):
+        self.try_ = try_
+        self.catch_ = catch_
+        self.finally_ = finally_
+
+
+class StateEnum(Sentence):
+    def __init__(self, keys, values):
+        self.keys = keys
+        self.values = values
+
+
+class DefClass(Sentence):
+    pass
+
+
+class DefFunc(Sentence):
+    pass
+
+
+class DefVar(Sentence):
+    pass
+
+
+class DefLambda(Expression):
     def __init__(self, exprs, block):
         self.exprs = exprs
         self.block = block

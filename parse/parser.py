@@ -127,6 +127,42 @@ class Parser:
 
         return Node.StateMatch(cond, states)
 
+    def parse_try(self) -> Node.StateTry:
+        self.check_pop('try')
+        try_block = self.parse_block()
+        catch_block = None
+        finally_block = None
+        if self.top.code == 'catch':
+            self.check_pop('catch')
+            catch_block = self.parse_block()
+        if self.top.code == 'finally':
+            self.check_pop('finally')
+            finally_block = self.parse_block()
+
+        return Node.StateTry(try_block, catch_block, finally_block)
+
+    def parse_enum(self) -> Node.StateEnum:
+        self.check_pop('enum')
+        self.check_pop('{')
+        keys, values = [], []
+        while self.top != '}':
+            ide = self.pop_tok()
+            val = self.pop_tok() if self.top == '=' else None
+            keys.append(ide)
+            values.append(val)
+        self.check_pop('}')
+
+        return Node.StateEnum(keys, values)
+
+    def parse_class(self) -> Node.DefClass:
+        pass
+
+    def parse_func(self) -> Node.DefFunc:
+        pass
+
+    def parse_var(self) -> Node.DefVar:
+        pass
+
     def parse_expr(self) -> Node.Expression:
         pass
 
