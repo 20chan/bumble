@@ -73,6 +73,31 @@ class Parser:
 
         return Node.StateIf(cond, true_block, false_block)
 
+    def parse_while(self):
+        self.check_pop('while')
+        self.check_pop('(')
+        cond = self.parse_expr()
+        self.check_pop(')')
+        block = self.parse_statement()
+
+        return Node.StateWhile(cond, block)
+
+    def parse_for(self):
+        self.check_pop('for')
+        self.check_pop('(')
+        init = self.parse_expr()
+        check = self.parse_expr()
+        add = self.parse_expr()
+        block = self.parse_statement()
+
+        return Node.StateFor(init, check, add, block)
+
+    def parse_cond(self):
+        self.check_pop('cond')
+        self.check_pop('(')
+        self.parse_expr()
+        self.check_pop(')')
+
     def parse_expr(self) -> Node.Expression:
         pass
 

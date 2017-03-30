@@ -33,11 +33,15 @@ class StateWhile(Sentence):
 
 
 class StateFor(Sentence):
-    def __init__(self, init, check, add, loop):
+    def __init__(self, init, check, add, block):
         self.init = init
         self.check = check
         self.add = add
-        self.loop = loop
+        self.block = block
+
+
+class StateCond(Sentence):
+    def __init__(self, cond, ):
 
 
 class LambdaDef(Expression):
