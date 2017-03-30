@@ -72,7 +72,7 @@ def parse_string(code: str) -> (Token, int):
             res += code[i]
 
         i += 1
-        decoded = decode_escape(code[i])
+        decode = decode_escape(code[i])
         if decode is None:
             return Token(None, TokenType.ERROR), i
 
