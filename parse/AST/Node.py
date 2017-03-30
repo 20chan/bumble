@@ -41,7 +41,16 @@ class StateFor(Sentence):
 
 
 class StateCond(Sentence):
-    def __init__(self, cond, ):
+    def __init__(self, cond, states, otherwise=None):
+        self.cond = cond
+        self.states = states
+        self.otherwise = otherwise
+
+
+class StateMatch(Sentence):
+    def __init__(self, cond, states):
+        self.cond = cond
+        self.states = states
 
 
 class LambdaDef(Expression):

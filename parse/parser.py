@@ -59,7 +59,7 @@ class Parser:
         else:
             return Node.Statement(self.parse_sentence())
 
-    def parse_if(self):
+    def parse_if(self) -> Node.StateIf:
         self.check_pop('if')
         self.check_pop('(')
         cond = self.parse_expr()
@@ -73,7 +73,7 @@ class Parser:
 
         return Node.StateIf(cond, true_block, false_block)
 
-    def parse_while(self):
+    def parse_while(self) -> Node.StateWhile:
         self.check_pop('while')
         self.check_pop('(')
         cond = self.parse_expr()
@@ -82,7 +82,7 @@ class Parser:
 
         return Node.StateWhile(cond, block)
 
-    def parse_for(self):
+    def parse_for(self) -> Node.StateFor:
         self.check_pop('for')
         self.check_pop('(')
         init = self.parse_expr()
@@ -92,11 +92,40 @@ class Parser:
 
         return Node.StateFor(init, check, add, block)
 
-    def parse_cond(self):
+    def parse_cond(self) -> Node.StateCond:
         self.check_pop('cond')
         self.check_pop('(')
-        self.parse_expr()
+        cond = self.parse_expr()
         self.check_pop(')')
+        self.check_pop('{')
+        states = []
+        other = None
+        while self.top.code != '}':
+            pat = self.parse_pattern()
+            self.check_pop('then')
+            stmt = self.parse_statement()
+            states.append((pat, stmt))
+        if self.top.code == 'otherwise':
+            self.check_pop('otherwise')
+            other = self.parse_expr()
+        self.check_pop('}')
+
+        return Node.StateCond(cond, states, other)
+
+    def parse_match(self) -> Node.StateMatch:
+        self.check_pop('match')
+        self.check_pop('(')
+        cond = self.parse_expr()
+        self.check_pop(')')
+        self.check_pop('{')
+        states = []
+        while self.top.code != '}':
+            pat = self.parse_pattern()
+            self.check_pop('then')
+            stmt = self.parse_statement()
+            states.append((pat, stmt))
+
+        return Node.StateMatch(cond, states)
 
     def parse_expr(self) -> Node.Expression:
         pass
