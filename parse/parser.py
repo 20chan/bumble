@@ -18,6 +18,9 @@ class Parser:
     def parse(self) -> Node.Node:
         return self.parse_sentence()
 
+    def check_pop(self, tok):
+        return self.pop_tok().code == tok
+
     def parse_sentence(self) -> Node.Sentence:
         if self.top.type == TokenType.IF:
             return self.parse_if()
@@ -44,18 +47,22 @@ class Parser:
 
     def parse_block(self) -> [Node.Sentence]:
         res = []
+        self.check_pop('{')
         while self.pop_tok() != "}":
             res.append(self.parse_sentence())
         return res
 
     def parse_statement(self) -> Node.Statement:
-        if self.pop_tok().code == "{":
+        if self.top.code == "{":
             return Node.Statement(self.parse_block())
         else:
             return Node.Statement(self.parse_sentence())
 
     def parse_if(self):
+        self.check_pop('while')
+        self.check_pop('(')
         cond = self.parse_expr()
+        self.check_pop(')')
         true_block = self.parse_statement()
 
         if self.pop_tok().TokenType == TokenType.ELSE:
