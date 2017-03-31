@@ -102,7 +102,7 @@ class Parser:
         states = []
         other = None
         while self.top.code != '}':
-            pat = self.parse_pattern()
+            pat = self.parse_expr()
             self.check_pop('then')
             stmt = self.parse_statement()
             states.append((pat, stmt))
@@ -198,7 +198,7 @@ class Parser:
         return Node.DefVar(name, val)
 
     def parse_id(self) -> Node.Expression:
-        identifier = self.pop_tok()
+        identifier = self.parse_expr()
         if self.top.code == '=':
             return self.parse_assign(identifier)
         if self.top.type == TokenType.BIND:
@@ -207,7 +207,7 @@ class Parser:
             return self.parse_call(identifier)
 
     def parse_assign(self, ide) -> Node.NodeAssign:
-        left = self.parse_expr()
+        left = ide
         self.check_pop(':=')
         right = self.parse_expr()
         self.check_pop(';')
@@ -215,7 +215,7 @@ class Parser:
         return Node.NodeAssign(left, right)
 
     def parse_bind(self, ide) -> Node.NodeBind:
-        left = self.parse_expr()
+        left = ide
         self.check_pop(':=')
         right = self.parse_expr()
         self.check_pop(';')
@@ -223,10 +223,9 @@ class Parser:
         return Node.NodeBind(left, right)
 
     def parse_call(self, ide) -> Node.NodeCall:
-        expr = self.parse_expr()
         self.check_pop(';')
 
-        return Node.NodeCall(expr)
+        return Node.NodeCall(ide)
 
     def parse_expr(self) -> Node.Expression:
         pass
