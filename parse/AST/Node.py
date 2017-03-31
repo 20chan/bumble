@@ -67,15 +67,22 @@ class StateEnum(Sentence):
 
 
 class DefClass(Sentence):
-    pass
+    def __init__(self, name, parent, sentences):
+        self.name = name
+        self.parent = parent
+        self.sentences = sentences
 
 
 class DefFunc(Sentence):
-    pass
+    def __init__(self, args, block):
+        self.args = args
+        self.block = block
 
 
 class DefVar(Sentence):
-    pass
+    def __init__(self, name, val=None):
+        self.name = name
+        self.value = val
 
 
 class DefLambda(Expression):

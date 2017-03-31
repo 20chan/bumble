@@ -1,6 +1,7 @@
 from parse.lexer import tokenize
 from parse.tok import Token, TokenType
 import parse.AST.Node as Node
+from typing import List
 
 
 class Parser:
@@ -45,10 +46,10 @@ class Parser:
         if self.top.type == TokenType.IDENTIFIER:
             return self.parse_id()
 
-    def parse_block(self) -> [Node.Sentence]:
+    def parse_block(self) -> List[Node.Sentence]:
         res = []
         self.check_pop('{')
-        while self.top != "}":
+        while self.top.code != "}":
             res.append(self.parse_sentence())
         self.check_pop('}')
         return res
@@ -145,9 +146,9 @@ class Parser:
         self.check_pop('enum')
         self.check_pop('{')
         keys, values = [], []
-        while self.top != '}':
+        while self.top.code != '}':
             ide = self.pop_tok()
-            val = self.pop_tok() if self.top == '=' else None
+            val = self.pop_tok() if self.top.code == '=' else None
             keys.append(ide)
             values.append(val)
         self.check_pop('}')
@@ -155,13 +156,44 @@ class Parser:
         return Node.StateEnum(keys, values)
 
     def parse_class(self) -> Node.DefClass:
-        pass
+        self.check_pop('class')
+        name = self.pop_tok()
+        parent = None
+        if self.top.code == ':':
+            self.check_pop(':')
+            parent = self.pop_tok()
+        self.check_pop('{')
+        sentences = []
+        while self.top != '}':
+            sentences.append(self.parse_sentence())
+        self.check_pop('}')
+
+        return Node.DefClass(name, parent, sentences)
 
     def parse_func(self) -> Node.DefFunc:
-        pass
+        self.check_pop('func')
+        args = self.parse_args()
+        block = self.parse_block()
+
+        return Node.DefFunc(args, block)
+
+    def parse_args(self) -> List[str]:
+        res = []
+        self.check_pop('(')
+        while self.top.code != ')':
+            res.append(self.pop_tok())
+        self.check_pop(')')
+        return res
 
     def parse_var(self) -> Node.DefVar:
-        pass
+        self.check_pop('var')
+        name = self.pop_tok()
+        if self.top.code == '=':
+            self.check_pop('=')
+            val = self.parse_expr()
+        self.check_pop(';')
+
+        return Node.DefVar(name, val)
 
     def parse_expr(self) -> Node.Expression:
         pass
