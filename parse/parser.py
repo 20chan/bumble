@@ -197,9 +197,6 @@ class Parser:
 
         return Node.DefVar(name, val)
 
-    def parse_expr(self) -> Node.Expression:
-        pass
-
     def parse_id(self) -> Node.Expression:
         identifier = self.pop_tok()
         if self.top.code == '=':
@@ -210,10 +207,26 @@ class Parser:
             return self.parse_call(identifier)
 
     def parse_assign(self, ide) -> Node.NodeAssign:
-        pass
+        left = self.parse_expr()
+        self.check_pop(':=')
+        right = self.parse_expr()
+        self.check_pop(';')
+
+        return Node.NodeAssign(left, right)
 
     def parse_bind(self, ide) -> Node.NodeBind:
-        pass
+        left = self.parse_expr()
+        self.check_pop(':=')
+        right = self.parse_expr()
+        self.check_pop(';')
+
+        return Node.NodeBind(left, right)
 
     def parse_call(self, ide) -> Node.NodeCall:
+        expr = self.parse_expr()
+        self.check_pop(';')
+
+        return Node.NodeCall(expr)
+
+    def parse_expr(self) -> Node.Expression:
         pass

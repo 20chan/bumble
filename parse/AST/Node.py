@@ -104,18 +104,17 @@ class NodeInteger(NodeLiteral):
 
 
 class NodeAssign(Expression):
-    def __init__(self, name, exp=None):
-        self.name = name
-        self.exp = exp
+    def __init__(self, left, right):
+        self.left = left
+        self.right = right
 
 
 class NodeBind(Expression):
-    def __init__(self, name, exp):
-        self.name = name
-        self.exp = exp
+    def __init__(self, left, right):
+        self.left = left
+        self.right = right
 
 
 class NodeCall(Expression):
-    def __init__(self, exp, *args):
-        self.exp = exp
-        self.args = args
+    def __init__(self, expr):
+        self.expr = expr
