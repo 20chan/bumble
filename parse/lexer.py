@@ -1,4 +1,4 @@
-from parse.tok import Token, TokenType
+from parse.tok import *
 
 
 def decode_escape(char: str) -> str:
@@ -37,25 +37,26 @@ def parse_token(code: str, index=0) -> (Token, int):
         return parse_string(current)
     if str.isdigit(cur):
         return parse_number(current)
-    if cur in Token.operator_unit:
+    if cur in operator_unit:
         return parse_operator(current)
-    if cur in Token.separators:
+    if cur in separators:
         return parse_separator(current)
     return parse_identifier(current)
 
 
 def parse_comment(code: str) -> (Token, int):
-    codeValue = code[1]
+    code_value = code[1]
+    i = 0
 
-    if not codeValue in '/*':
+    if not code_value in '/*':
         i = 0
 
-    if codeValue == '/':
+    if code_value == '/':
         i = 2
         while i < len(code) and code[i] != '\n':
             i += 1
 
-    if codeValue == '*':
+    if code_value == '*':
         i = 2
         while i < len(code) - 1 and code[i:i+2] != '*/':
             i += 1
@@ -103,7 +104,7 @@ def parse_operator(code: str) -> (Token, int):
         return parse_separator(code)
 
     i = 0
-    while code[i] in Token.operator_unit:
+    while code[i] in operator_unit:
         i += 1
 
     # code[i]가 operator가 아니므로 i+1이 아닌 i를 리턴
@@ -119,11 +120,11 @@ def parse_identifier(code: str) -> (Token, int):
     while not Token.is_split_char(code[i]):
         i += 1
 
-    if code[:i] not in Token.keywords:
+    if code[:i] not in keywords:
         return Token(code[:i], TokenType.IDENTIFIER), i
 
     syntax = code[:i]
-    stateToken = {
+    state_token = {
         'if': TokenType.IF,
         'else': TokenType.ELSE,
         'match': TokenType.MATCH,
@@ -143,7 +144,7 @@ def parse_identifier(code: str) -> (Token, int):
         'false': TokenType.FALSE
     }
 
-    return Token(syntax, stateToken[syntax]), i
+    return Token(syntax, state_token[syntax]), i
 
 
 if __name__ == '__main__':

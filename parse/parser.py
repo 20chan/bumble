@@ -10,14 +10,18 @@ class Parser:
         self._toks = list(tokenize(code))
 
     def pop_tok(self):
-        return self._toks.pop()
+        return self._toks.pop(0)
 
     @property
     def top(self) -> Token:
         return self._toks[0]
 
-    def parse(self) -> Node.Node:
-        return self.parse_sentence()
+    def parse(self) -> Node.Statement:
+        res = []
+        while self.top.type != TokenType.EOF:
+            res.append(self.parse_sentence())
+
+        return Node.Statement(res)
 
     def check_pop(self, tok):
         return self.pop_tok().code == tok
@@ -229,3 +233,7 @@ class Parser:
 
     def parse_expr(self) -> Node.Expression:
         pass
+
+if __name__ == '__main__':
+    p = Parser('var i = 16;')
+    p.parse()

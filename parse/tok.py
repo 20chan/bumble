@@ -1,11 +1,12 @@
 from enum import Enum
 
+separators = '.,:;[]{}()'
+operator_unit = ':=+-*/%^&$|<>!'
+keywords = ['var', 'func', 'if', 'else', 'cond', 'then', 'match', 'while', 'for', 'in'
+            'return', 'yield', 'skip', 'break', 'nothing', 'true', 'false']
+
 
 class Token:
-    separators = '.,:;[]{}()'
-    operator_unit = ':=+-*/%^&$|<>!'
-    keywords = ['var', 'func', 'if', 'else', 'cond', 'then', 'match', 'while', 'for', 'in'
-                'return', 'yield', 'skip', 'break', 'nothing', 'true', 'false']
 
     def __init__(self, code, tok_type):
         self.code = code
@@ -17,8 +18,8 @@ class Token:
 
     @staticmethod
     def is_split_char(char):
-        return char in Token.separators or \
-            char in Token.operator_unit or \
+        return char in separators or \
+            char in operator_unit or \
             char in ' \r\n\t'
 
 
