@@ -61,7 +61,8 @@ class StateTry(Sentence):
 
 
 class StateEnum(Sentence):
-    def __init__(self, keys, values):
+    def __init__(self, name, keys, values):
+        self.name = name
         self.keys = keys
         self.values = values
 
@@ -74,7 +75,8 @@ class DefClass(Sentence):
 
 
 class DefFunc(Sentence):
-    def __init__(self, args, block):
+    def __init__(self, name, args, block):
+        self.name = name
         self.args = args
         self.block = block
 
@@ -102,14 +104,14 @@ class NodeInteger(NodeLiteral):
 
 
 class NodeAssign(Expression):
-    def __init__(self, ide, exp=None):
-        self.id = ide
+    def __init__(self, name, exp=None):
+        self.name = name
         self.exp = exp
 
 
 class NodeBind(Expression):
-    def __init__(self, ide, exp):
-        self.ide = ide
+    def __init__(self, name, exp):
+        self.name = name
         self.exp = exp
 
 

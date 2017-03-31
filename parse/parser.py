@@ -144,6 +144,7 @@ class Parser:
 
     def parse_enum(self) -> Node.StateEnum:
         self.check_pop('enum')
+        name = self.pop_tok()
         self.check_pop('{')
         keys, values = [], []
         while self.top.code != '}':
@@ -153,7 +154,7 @@ class Parser:
             values.append(val)
         self.check_pop('}')
 
-        return Node.StateEnum(keys, values)
+        return Node.StateEnum(name, keys, values)
 
     def parse_class(self) -> Node.DefClass:
         self.check_pop('class')
@@ -172,10 +173,11 @@ class Parser:
 
     def parse_func(self) -> Node.DefFunc:
         self.check_pop('func')
+        name = self.pop_tok()
         args = self.parse_args()
         block = self.parse_block()
 
-        return Node.DefFunc(args, block)
+        return Node.DefFunc(name, args, block)
 
     def parse_args(self) -> List[str]:
         res = []
