@@ -218,7 +218,7 @@ class Parser:
 
     def parse_assign(self, ide) -> Node.NodeAssign:
         left = ide
-        self.check_pop(':=')
+        self.check_pop('=')
         right = self.parse_expr()
         self.check_pop(';')
 
@@ -376,6 +376,6 @@ class Parser:
 
 
 if __name__ == '__main__':
-    p = Parser('do(1, 2);')
+    p = Parser('b = 1 ++ do(-a(), 1);')
     result = p.parse()
     print(result)
