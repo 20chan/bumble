@@ -187,7 +187,7 @@ class Parser:
     def parse_args(self) -> List[str]:
         res = []
         self.check_pop('(')
-        while self.top.code != ')':
+        while self.top.code == '':
             res.append(self.pop_tok())
         self.check_pop(')')
         return res
@@ -360,6 +360,9 @@ class Parser:
         return res
 
     def parse_exprs(self) -> List[Node.Expression]:
+        if self.top == ')':
+            self.check_pop(')')
+            return []
         res = [self.parse_expr()]
         while self.top == ',':
             self.check_pop(',')
@@ -369,6 +372,6 @@ class Parser:
 
 
 if __name__ == '__main__':
-    p = Parser('var i = 16; func a(b,c) { do(); }')
-    res = p.parse()
-    print(res)
+    p = Parser('do();')
+    result = p.parse()
+    print(result)
