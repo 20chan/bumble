@@ -1,6 +1,7 @@
 from parse.lexer import tokenize
 from parse.tok import Token, TokenType
 import parse.AST.Node as Node
+# import better_exceptions
 from typing import List
 
 
@@ -24,7 +25,7 @@ class Parser:
         return Node.Statement(res)
 
     def check_pop(self, tok):
-        return self.pop_tok().code == tok
+        assert(self.pop_tok().code == tok)
 
     def parse_sentence(self) -> Node.Sentence:
         if self.top.type == TokenType.IF:
@@ -369,4 +370,5 @@ class Parser:
 
 if __name__ == '__main__':
     p = Parser('var i = 16; func a(b,c) { do(); }')
-    p.parse()
+    res = p.parse()
+    print(res)
