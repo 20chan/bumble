@@ -232,8 +232,141 @@ class Parser:
         return Node.NodeCall(ide)
 
     def parse_expr(self) -> Node.Expression:
-        pass
+        # TODO: parse lambda
+        if self.top.code == '_':
+            return Node.ExprWildcard()
+        return self.parse_or_expr()
+
+    def parse_or_expr(self) -> Node.ExprOr:
+        ands = [self.parse_and_expr()]
+        while self.top.code == '||':
+            self.check_pop('||')
+            ands.append(self.parse_and_expr())
+
+        return Node.ExprOr(ands)
+
+    def parse_and_expr(self) -> Node.ExprAnd:
+        xors = [self.parse_xor_expr()]
+        while self.top.code == '&&':
+            self.check_pop('&&')
+            xors.append(self.parse_xor_expr())
+
+        return Node.ExprAnd(xors)
+
+    def parse_xor_expr(self) -> Node.ExprXor:
+        shifts = [self.parse_shift_expr()]
+        while self.top.code == '^':
+            self.check_pop('^')
+            shifts.append(self.parse_shift_expr())
+
+        return Node.ExprXor(shifts)
+
+    def parse_shift_expr(self) -> Node.ExprShift:
+        cmd = self.parse_cmd_expr()
+        cmds = []
+        while self.top.code in ['>>', '<<']:
+            self.check_pop(self.top.code)
+            cmds.append(self.parse_cmd_expr())
+
+        return Node.ExprShift(cmd, cmds)
+
+    def parse_cmd_expr(self) -> Node.ExprCmd:
+        l = self.parse_list_expr()
+        ls = []
+        while self.top.code in ["<", ">", "==", "<=", ">=", "!="]:
+            self.check_pop(self.top.code)
+            ls.append(self.parse_list_expr())
+
+        return Node.ExprCmd(l, ls)
+
+    def parse_list_expr(self) -> Node.ExprList:
+        pipe = self.parse_pipe_expr()
+        pipes = []
+        while self.top.code in [":", "++"]:
+            self.check_pop(self.top.code)
+            pipes.append(self.parse_pipe_expr())
+
+        return Node.ExprList(pipe, pipes)
+
+    def parse_pipe_expr(self) -> Node.ExprPipe:
+        arith = self.parse_arith_expr()
+        ariths = []
+        while self.top.code == '|>':
+            self.check_pop('|>')
+            ariths.append(self.parse_arith_expr())
+
+        return Node.ExprPipe(arith, ariths)
+
+    def parse_arith_expr(self) -> Node.ExprArith:
+        term = self.parse_term()
+        terms = []
+        while self.top.code in ['+', '-']:
+            self.check_pop(self.top.code)
+            terms.append(self.parse_term())
+
+        return Node.ExprArith(term, terms)
+
+    def parse_term(self) -> Node.Term:
+        factor = self.parse_factor()
+        factors = []
+        while self.top.code in ['*', '/', '%']:
+            self.check_pop(self.top.code)
+            factors.append(self.parse_factor())
+
+        return Node.Term(factor, factors)
+
+    def parse_factor(self) -> Node.Factor:
+        factors = []
+        while self.top.code in ['+', '-']:
+            factors.append(self.pop_tok())
+        power = self.parse_power()
+
+        return Node.Factor(factors, power)
+
+    def parse_power(self) -> Node.Power:
+        atoms = [self.parse_atom_expr()]
+        while self.top.code == '**':
+            self.check_pop('**')
+            atoms.append(self.parse_atom_expr())
+
+        return Node.Power(atoms)
+
+    def parse_atom_expr(self) -> Node.ExprAtom:
+        atom = self.parse_atom()
+        trailers = []
+        while self.top.code in ['(', '[', '.']:
+            trailers.append(self.parse_trailer())
+
+        return Node.ExprAtom(atom, trailers)
+
+    def parse_atom(self) -> Node.Atom:
+        return self.pop_tok()
+
+    def parse_trailer(self) -> Node.Trailer:
+        res = None
+        if self.top.code == '(':
+            self.check_pop('(')
+            res = Node.TrailerCall(self.parse_exprs())
+            self.check_pop(')')
+        elif self.top.code == '[':
+            self.check_pop('[')
+            res = Node.TrailerIndex(self.parse_exprs())
+            self.check_pop(']')
+        elif self.top.code == '.':
+            self.check_pop('.')
+            res = Node.TrailerDot(self.pop_tok())
+
+        return res
+
+    def parse_exprs(self) -> List[Node.Expression]:
+        res = [self.parse_expr()]
+        while self.top == ',':
+            self.check_pop(',')
+            res.append(self.parse_expr())
+
+        return res
+
 
 if __name__ == '__main__':
-    p = Parser('var i = 16;')
+    p = Parser('var i = 16; func a(b,c) { do(); }')
     p.parse()

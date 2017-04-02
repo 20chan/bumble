@@ -93,16 +93,6 @@ class DefLambda(Expression):
         self.block = block
 
 
-class NodeLiteral(Expression):
-    def __init__(self, val):
-        self.val = val
-
-
-class NodeInteger(NodeLiteral):
-    def __init__(self, val):
-        NodeLiteral.__init__(self, val)
-
-
 class NodeAssign(Expression):
     def __init__(self, left, right):
         self.left = left
@@ -118,3 +108,124 @@ class NodeBind(Expression):
 class NodeCall(Expression):
     def __init__(self, expr):
         self.expr = expr
+
+
+class ExprWildcard(Expression):
+    def __init__(self):
+        pass
+
+
+class ExprOr(Expression):
+    def __init__(self, ands):
+        self.ands = ands
+
+
+class ExprAnd(Expression):
+    def __init__(self, xors):
+        self.xors = xors
+
+
+class ExprXor(Expression):
+    def __init__(self, shifts):
+        self.shifts = shifts
+
+
+class ExprShift(Expression):
+    def __init__(self, cmd, cmds):
+        """
+        a >> b << c 의 코드는 다음과 같이 파싱된다
+        :param cmd: a
+        :param cmds: [(">>", b), ("<<", c)]
+        """
+        self.cmd = cmd
+        self.cmds = cmds
+
+
+class ExprCmd(Expression):
+    def __init__(self, l, ls):
+        """
+        a > b != c 의 코드는 다음과 같이 파싱된다
+        :param l: a
+        :param ls: (">", b), ("!=", c)
+        """
+        self.l = l
+        self.ls = ls
+
+
+class ExprList(Expression):
+    def __init__(self, pipe, pipes):
+        self.pipe = pipe
+        self.pipes = pipes
+
+
+class ExprPipe(Expression):
+    def __init__(self, arith, ariths):
+        self.arith = arith
+        self.ariths = ariths
+
+
+class ExprArith(Expression):
+    def __init__(self, term, terms):
+        self.term = term
+        self.terms = terms
+
+
+class Term(Expression):
+    def __init__(self, factor, factors):
+        self.factor = factor
+        self.factors = factors
+
+
+class Factor(Expression):
+    def __init__(self, factors, power):
+        """
+        factor := (+,-)* <power>
+        :param factors: 형식은 [("+"| "-")*]
+        :param power: <power>
+        """
+        self.factors = factors
+        self.power = power
+
+
+class Power(Expression):
+    def __init__(self, atoms):
+        self.atoms = atoms
+
+
+class ExprAtom(Expression):
+    def __init__(self, atom, trailers):
+        self.atom = atom
+        self.trailers = trailers
+
+
+class Atom(Expression):
+    pass
+
+
+class NodeLiteral(Expression):
+    def __init__(self, val):
+        self.val = val
+
+
+class NodeInteger(NodeLiteral):
+    def __init__(self, val):
+        NodeLiteral.__init__(self, val)
+
+
+class Trailer(Node):
+    pass
+
+
+class TrailerCall(Trailer):
+    def __init__(self, exprs):
+        self.exprs = exprs
+
+
+class TrailerIndex(Trailer):
+    def __init__(self, exprs):
+        self.exprs = exprs
+
+
+class TrailerDot(Trailer):
+    def __init__(self, ide):
+        self.ide = ide

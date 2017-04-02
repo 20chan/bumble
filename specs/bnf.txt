@@ -33,8 +33,7 @@
 <arith_expr> := <term> (("+" | "-") <term>)*
 <term> := <factor> (("*" | "/" | "%") <factor>)*
 <factor> := ("+" | "-") <factor> | <power>
-<power> := <power> ["**" <power>] | <dot>
-<dot> := <dot> ("." <dot>)* | <atom_expr>
+<power> := <atom_expr> ("**" <atom_expr>)*
 <atom_expr> := <atom> <trailer>*
 
 <atom> := <tuple> | <list> | <map>
