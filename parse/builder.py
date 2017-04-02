@@ -208,8 +208,13 @@ class Parser:
             return self.parse_assign(identifier)
         if self.top.type == TokenType.BIND:
             return self.parse_bind(identifier)
-        if self.top.code == '(':
-            return self.parse_call(identifier)
+
+        # 여기서, parse_expr()의 결과는 parse_call을 필요로 하지 않는다
+        # 그래서 그냥 check_pop(';')를 실행함
+        # 근데 1; 같은거는..?
+        # ;ㅅ; 살려줘
+
+        return self.parse_call(identifier)
 
     def parse_assign(self, ide) -> Node.NodeAssign:
         left = ide
@@ -360,11 +365,10 @@ class Parser:
         return res
 
     def parse_exprs(self) -> List[Node.Expression]:
-        if self.top == ')':
-            self.check_pop(')')
+        if self.top.code == ')':
             return []
         res = [self.parse_expr()]
-        while self.top == ',':
+        while self.top.code == ',':
             self.check_pop(',')
             res.append(self.parse_expr())
 
@@ -372,6 +376,6 @@ class Parser:
 
 
 if __name__ == '__main__':
-    p = Parser('do();')
+    p = Parser('do(1, 2);')
     result = p.parse()
     print(result)
