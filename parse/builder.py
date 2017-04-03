@@ -367,7 +367,7 @@ class Parser:
 
         return res
 
-
+# HACK: 1+1*1 파싱하면 무한루프돔
 if __name__ == '__main__':
     p = Parser('a=1+1;')
     result = p.parse()
