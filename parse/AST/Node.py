@@ -1,6 +1,12 @@
+from typing import List, Tuple
+
+
 class Node:
     def __repr__(self):
         return '<{}>'.format(type(self).__name__)
+
+    def simplify(self):
+        pass
 
 
 class Statement(Node):
@@ -20,16 +26,26 @@ class Expression(Sentence):
 
 
 class StateIf(Sentence):
-    def __init__(self, cond, true_block, false_block):
+    def __init__(self, cond: Expression, true_block: Statement, false_block: Statement):
         self.cond = cond
         self.true_block = true_block
         self.false_block = false_block
 
+    def simplify(self):
+        if self.false_block is None:
+            return ['if', self.cond.simplify(), self.true_block.simplify(),
+                    'else', self.false_block.simplify()]
+        else:
+            return ['if', self.cond.simplify(), self.true_block.simplify()]
+
 
 class StateWhile(Sentence):
-    def __init__(self, cond, block):
+    def __init__(self, cond: Expression, block: Statement):
         self.cond = cond
         self.block = block
+
+    def simplify(self):
+        return ['while', self.cond.simplify(), self.block.simplify()]
 
 
 class StateFor(Sentence):
@@ -114,42 +130,77 @@ class ExprWildcard(Expression):
     def __init__(self):
         pass
 
+    def simplify(self):
+        return '_'
+
 
 class ExprOr(Expression):
-    def __init__(self, ands):
+    def __init__(self, ands: List[ExprAnd]):
         self.ands = ands
+
+    def simplify(self):
+        if len(self.ands) == 0:
+            return self.ands[0].simplify()
+        else:
+            return [s.simplify() for s in self.ands]
 
 
 class ExprAnd(Expression):
-    def __init__(self, xors):
+    def __init__(self, xors: List[ExprXor]):
         self.xors = xors
+
+    def simplify(self):
+        if len(self.xors) == 0:
+            return self.xors[0].simplify()
+        else:
+            return [s.simplify() for s in self.xors]
 
 
 class ExprXor(Expression):
-    def __init__(self, shifts):
+    def __init__(self, shifts: List[ExprShift]):
         self.shifts = shifts
+
+    def simplify(self):
+        if len(self.shifts) == 0:
+            return self.shifts[0].simplify()
+        else:
+            return [s.simplify() for s in self.shifts]
 
 
 class ExprShift(Expression):
-    def __init__(self, cmd, cmds):
+    def __init__(self, cmds: List[Tuple]):
         """
         a >> b << c 의 코드는 다음과 같이 파싱된다
-        :param cmd: a
-        :param cmds: [(">>", b), ("<<", c)]
+        :param cmds: [(None, a), (">>", b), ("<<", c)]
         """
-        self.cmd = cmd
         self.cmds = cmds
+
+    def simplify(self):
+        if len(self.cmds) == 0:
+            return self.cmds[0][1].simplify()
+        else:
+            res = [self.cmds[0][1].simplify()]
+            for c in self.cmds[1:]:
+                res.append(c[0])
+                res.append(c[1].simplify())
 
 
 class ExprCmd(Expression):
-    def __init__(self, l, ls):
+    def __init__(self, lists):
         """
         a > b != c 의 코드는 다음과 같이 파싱된다
-        :param l: a
-        :param ls: (">", b), ("!=", c)
+        :param lists: [(None, a), (">", b), ("!=", c)]
         """
-        self.l = l
-        self.ls = ls
+        self.lists = lists
+
+    def simplify(self):
+        if len(self.lists) == 0:
+            return self.lists[0][1].simplify()
+        else:
+            res = [self.lists[0][1].simplify()]
+            for l in self.lists[1:]:
+                res.append(l[0])
+                res.append(l[1].simplify())
 
 
 class ExprList(Expression):

@@ -268,22 +268,20 @@ class Parser:
         return Node.ExprXor(shifts)
 
     def parse_shift_expr(self) -> Node.ExprShift:
-        cmd = self.parse_cmd_expr()
-        cmds = []
+        cmds = [(None, self.parse_cmd_expr())]
         while self.top.code in ['>>', '<<']:
-            self.check_pop(self.top.code)
-            cmds.append(self.parse_cmd_expr())
+            tok = self.pop_tok().code
+            cmds.append((tok, self.parse_cmd_expr()))
 
-        return Node.ExprShift(cmd, cmds)
+        return Node.ExprShift(cmds)
 
     def parse_cmd_expr(self) -> Node.ExprCmd:
-        l = self.parse_list_expr()
-        ls = []
+        lists = [(None, self.parse_list_expr())]
         while self.top.code in ["<", ">", "==", "<=", ">=", "!="]:
-            self.check_pop(self.top.code)
-            ls.append(self.parse_list_expr())
+            tok = self.pop_tok().code
+            lists.append((tok, self.parse_list_expr()))
 
-        return Node.ExprCmd(l, ls)
+        return Node.ExprCmd(lists)
 
     def parse_list_expr(self) -> Node.ExprList:
         pipe = self.parse_pipe_expr()
