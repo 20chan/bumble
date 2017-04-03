@@ -17,7 +17,10 @@ class Statement(Node):
             self.sentences = sentences
 
     def simplify(self):
-        return [s.simplify() for s in self.sentences]
+        if len(self.sentences) == 1:
+            return self.sentences[0].simplify()
+        else:
+            return [s.simplify() for s in self.sentences]
 
 
 class Sentence(Node):
@@ -279,6 +282,7 @@ class ExprArith(Expression):
             for l in self.terms[1:]:
                 res.append(l[0])
                 res.append(l[1].simplify())
+            return res
 
 
 class Term(Expression):
@@ -332,7 +336,7 @@ class ExprAtom(Expression):
         if len(self.trailers) == 0:
             return self.atom.simplify()
         else:
-            return [self.atom] + [s.simplify() for s in self.trailers]
+            return [self.atom.simplify()] + [s.simplify() for s in self.trailers]
 
 
 class Atom(Expression):
@@ -365,7 +369,7 @@ class TrailerCall(Trailer):
         if len(self.exprs) == 0:
             return self.exprs[0].simplify()
         else:
-            return ["("] + [s.simplify() for s in self.exprs] + [")"]
+            return [s.simplify() for s in self.exprs]
 
 
 class TrailerIndex(Trailer):
