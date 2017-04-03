@@ -284,45 +284,40 @@ class Parser:
         return Node.ExprCmd(lists)
 
     def parse_list_expr(self) -> Node.ExprList:
-        pipe = self.parse_pipe_expr()
-        pipes = []
+        pipes = [(None, self.parse_pipe_expr())]
         while self.top.code in [":", "++"]:
-            self.check_pop(self.top.code)
-            pipes.append(self.parse_pipe_expr())
+            tok = self.pop_tok().code
+            pipes.append((tok, self.parse_pipe_expr()))
 
-        return Node.ExprList(pipe, pipes)
+        return Node.ExprList(pipes)
 
     def parse_pipe_expr(self) -> Node.ExprPipe:
-        arith = self.parse_arith_expr()
-        ariths = []
+        ariths = [ self.parse_arith_expr()]
         while self.top.code == '|>':
-            self.check_pop('|>')
             ariths.append(self.parse_arith_expr())
 
-        return Node.ExprPipe(arith, ariths)
+        return Node.ExprPipe(ariths)
 
     def parse_arith_expr(self) -> Node.ExprArith:
-        term = self.parse_term()
-        terms = []
+        terms = [(None, self.parse_term())]
         while self.top.code in ['+', '-']:
-            self.check_pop(self.top.code)
-            terms.append(self.parse_term())
+            tok = self.pop_tok().code
+            terms.append((tok, self.parse_term()))
 
-        return Node.ExprArith(term, terms)
+        return Node.ExprArith(terms)
 
     def parse_term(self) -> Node.Term:
-        factor = self.parse_factor()
-        factors = []
+        factors = [(None, self.parse_factor())]
         while self.top.code in ['*', '/', '%']:
-            self.check_pop(self.top.code)
-            factors.append(self.parse_factor())
+            tok = self.pop_tok().code
+            factors.append((tok, self.parse_factor()))
 
-        return Node.Term(factor, factors)
+        return Node.Term(factors)
 
     def parse_factor(self) -> Node.Factor:
         factors = []
         while self.top.code in ['+', '-']:
-            factors.append(self.pop_tok())
+            factors.append(self.pop_tok().code)
         power = self.parse_power()
 
         return Node.Factor(factors, power)
@@ -344,7 +339,8 @@ class Parser:
         return Node.ExprAtom(atom, trailers)
 
     def parse_atom(self) -> Node.Atom:
-        return self.pop_tok()
+        # TODO: 아톰 구현!!!!!!!!!!!
+        return Node.Atom(self.pop_tok().code)
 
     def parse_trailer(self) -> Node.Trailer:
         res = None

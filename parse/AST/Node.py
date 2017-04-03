@@ -122,8 +122,6 @@ class NodeBind(Expression):
 
 
 class NodeCall(Expression):
-    def __init__(self, expr):
-        self.expr = expr
 
 
 class ExprWildcard(Expression):
@@ -204,31 +202,60 @@ class ExprCmd(Expression):
 
 
 class ExprList(Expression):
-    def __init__(self, pipe, pipes):
-        self.pipe = pipe
+    def __init__(self, pipes):
         self.pipes = pipes
+
+    def simplify(self):
+        if len(self.pipes) == 0:
+            return self.pipes[0][1].simplify()
+        else:
+            res = [self.pipes[0][1].simplify()]
+            for l in self.pipes[1:]:
+                res.append(l[0])
+                res.append(l[1].simplify())
 
 
 class ExprPipe(Expression):
-    def __init__(self, arith, ariths):
-        self.arith = arith
+    def __init__(self, ariths):
         self.ariths = ariths
+
+    def simplify(self):
+        if len(self.ariths) == 0:
+            return self.ariths[0].simplify()
+        else:
+            return [s.simplify() for s in self.ariths]
 
 
 class ExprArith(Expression):
-    def __init__(self, term, terms):
-        self.term = term
+    def __init__(self, terms):
         self.terms = terms
+
+    def simplify(self):
+        if len(self.terms) == 0:
+            return self.terms[0][1].simplify()
+        else:
+            res = [self.terms[0][1].simplify()]
+            for l in self.terms[1:]:
+                res.append(l[0])
+                res.append(l[1].simplify())
 
 
 class Term(Expression):
-    def __init__(self, factor, factors):
-        self.factor = factor
+    def __init__(self, factors):
         self.factors = factors
+
+    def simplify(self):
+        if len(self.factors) == 0:
+            return self.factors[0][1].simplify()
+        else:
+            res = [self.factors[0][1].simplify()]
+            for l in self.factors[1:]:
+                res.append(l[0])
+                res.append(l[1].simplify())
 
 
 class Factor(Expression):
-    def __init__(self, factors, power):
+    def __init__(self, factors: List[str], power):
         """
         factor := (+,-)* <power>
         :param factors: 형식은 [("+"| "-")*]
@@ -237,10 +264,22 @@ class Factor(Expression):
         self.factors = factors
         self.power = power
 
+    def simplify(self):
+        if len(self.factors) == 0:
+            return self.power.simplify()
+        else:
+            return self.factors + [self.power.simplify()]
+
 
 class Power(Expression):
     def __init__(self, atoms):
         self.atoms = atoms
+
+    def simplify(self):
+        if len(self.atoms) == 0:
+            return self.atoms[0].simplify()
+        else:
+            return [s.simplify for s in self.atoms]
 
 
 class ExprAtom(Expression):
@@ -248,9 +287,16 @@ class ExprAtom(Expression):
         self.atom = atom
         self.trailers = trailers
 
+    def simplify(self):
+        if len(self.trailers) == 0:
+            return self.atom.simplify()
+        else:
+            return [self.atom] + [s.simplify() for s in self.trailers]
+
 
 class Atom(Expression):
-    pass
+    def __init__(self, code):
+        self.code = code
 
 
 class NodeLiteral(Expression):
@@ -271,12 +317,28 @@ class TrailerCall(Trailer):
     def __init__(self, exprs):
         self.exprs = exprs
 
+    def simplify(self):
+        if len(self.exprs) == 0:
+            return self.exprs[0].simplify()
+        else:
+            return ["("] + [s.simplify() for s in self.exprs] + [")"]
+
 
 class TrailerIndex(Trailer):
     def __init__(self, exprs):
         self.exprs = exprs
 
+    def simplify(self):
+        if len(self.exprs) == 0:
+            return self.exprs[0].simplify()
+        else:
+            return ["["] + [s.simplify() for s in self.exprs] + ["]"]
+
 
 class TrailerDot(Trailer):
     def __init__(self, ide):
         self.ide = ide
+
+    def simplify(self):
+        return [".", self.ide]
+
