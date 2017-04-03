@@ -151,15 +151,14 @@ class Parser:
         self.check_pop('enum')
         name = self.pop_tok()
         self.check_pop('{')
-        keys, values = [], []
+        maps = []
         while self.top.code != '}':
             ide = self.pop_tok()
             val = self.pop_tok() if self.top.code == '=' else None
-            keys.append(ide)
-            values.append(val)
+            maps.append((ide, val))
         self.check_pop('}')
 
-        return Node.StateEnum(name, keys, values)
+        return Node.StateEnum(name, maps)
 
     def parse_class(self) -> Node.DefClass:
         self.check_pop('class')
@@ -370,6 +369,7 @@ class Parser:
 
 
 if __name__ == '__main__':
-    p = Parser('b = 1 ++ do(-a(), 1);')
+    p = Parser('a=1+1;')
     result = p.parse()
-    print(result)
+    sim = result.simplify()
+    print(sim)

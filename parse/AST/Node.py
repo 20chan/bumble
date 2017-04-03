@@ -16,6 +16,9 @@ class Statement(Node):
         else:
             self.sentences = sentences
 
+    def simplify(self):
+        return [s.simplify() for s in self.sentences]
+
 
 class Sentence(Node):
     pass
@@ -55,12 +58,20 @@ class StateFor(Sentence):
         self.add = add
         self.block = block
 
+    def simplify(self):
+        return ['for', self.init.simplify(), self.check.simplify(), self.add.simplify(),
+                self.add.simplify(), self.block.simplify()]
+
 
 class StateCond(Sentence):
     def __init__(self, cond, states, otherwise=None):
         self.cond = cond
         self.states = states
         self.otherwise = otherwise
+
+    def simplify(self):
+        otherwise = ["otherwise", self.otherwise.simplify()] if self.otherwise is not None else []
+        return ["cond", self.cond.simplify(), *[s.simplify() for s in self.states]] + otherwise
 
 
 class StateMatch(Sentence):
@@ -75,12 +86,19 @@ class StateTry(Sentence):
         self.catch_ = catch_
         self.finally_ = finally_
 
+    def simplify(self):
+        catch = ["catch", self.catch_.simplify()] if self.catch_ is not None else []
+        final = ["finally", self.finally_.simplify()] if self.finally_ is not None else []
+        return ["try", self.try_.simplify()] + catch + final
+
 
 class StateEnum(Sentence):
-    def __init__(self, name, keys, values):
+    def __init__(self, name, maps):
         self.name = name
-        self.keys = keys
-        self.values = values
+        self.maps = maps
+
+    def simplify(self):
+        return ["enum", self.name, "{", *self.maps, "}"]
 
 
 class DefClass(Sentence):
@@ -89,6 +107,12 @@ class DefClass(Sentence):
         self.parent = parent
         self.sentences = sentences
 
+    def simplify(self):
+        if self.parent is None:
+            return ["class", self.name, self.sentences.simplify()]
+        else:
+            return ["class", self.name, ":", self.parent, self.sentences.simplify()]
+
 
 class DefFunc(Sentence):
     def __init__(self, name, args, block):
@@ -96,11 +120,20 @@ class DefFunc(Sentence):
         self.args = args
         self.block = block
 
+    def simplify(self):
+        return ["func", self.name, "(", *self.args, ")", self.block.simplify()]
+
 
 class DefVar(Sentence):
     def __init__(self, name, val=None):
         self.name = name
         self.value = val
+
+    def simplify(self):
+        if self.value is None:
+            return ["var", self.name]
+        else:
+            return ["var", self.name, "=", self.value.simplify()]
 
 
 class DefLambda(Expression):
@@ -114,14 +147,22 @@ class NodeAssign(Expression):
         self.left = left
         self.right = right
 
+    def simplify(self):
+        return [self.left.simplify(), "=", self.right.simplify()]
+
 
 class NodeBind(Expression):
     def __init__(self, left, right):
         self.left = left
         self.right = right
 
+    def simplify(self):
+        return [self.left.simplify(), ":=", self.right.simplify()]
+
 
 class NodeCall(Expression):
+    def __init__(self, expr):
+        self.expr = expr
 
 
 class ExprWildcard(Expression):
@@ -133,33 +174,33 @@ class ExprWildcard(Expression):
 
 
 class ExprOr(Expression):
-    def __init__(self, ands: List[ExprAnd]):
+    def __init__(self, ands: List):
         self.ands = ands
 
     def simplify(self):
-        if len(self.ands) == 0:
+        if len(self.ands) == 1:
             return self.ands[0].simplify()
         else:
             return [s.simplify() for s in self.ands]
 
 
 class ExprAnd(Expression):
-    def __init__(self, xors: List[ExprXor]):
+    def __init__(self, xors: List):
         self.xors = xors
 
     def simplify(self):
-        if len(self.xors) == 0:
+        if len(self.xors) == 1:
             return self.xors[0].simplify()
         else:
             return [s.simplify() for s in self.xors]
 
 
 class ExprXor(Expression):
-    def __init__(self, shifts: List[ExprShift]):
+    def __init__(self, shifts: List):
         self.shifts = shifts
 
     def simplify(self):
-        if len(self.shifts) == 0:
+        if len(self.shifts) == 1:
             return self.shifts[0].simplify()
         else:
             return [s.simplify() for s in self.shifts]
@@ -174,7 +215,7 @@ class ExprShift(Expression):
         self.cmds = cmds
 
     def simplify(self):
-        if len(self.cmds) == 0:
+        if len(self.cmds) == 1:
             return self.cmds[0][1].simplify()
         else:
             res = [self.cmds[0][1].simplify()]
@@ -192,7 +233,7 @@ class ExprCmd(Expression):
         self.lists = lists
 
     def simplify(self):
-        if len(self.lists) == 0:
+        if len(self.lists) == 1:
             return self.lists[0][1].simplify()
         else:
             res = [self.lists[0][1].simplify()]
@@ -206,7 +247,7 @@ class ExprList(Expression):
         self.pipes = pipes
 
     def simplify(self):
-        if len(self.pipes) == 0:
+        if len(self.pipes) == 1:
             return self.pipes[0][1].simplify()
         else:
             res = [self.pipes[0][1].simplify()]
@@ -220,7 +261,7 @@ class ExprPipe(Expression):
         self.ariths = ariths
 
     def simplify(self):
-        if len(self.ariths) == 0:
+        if len(self.ariths) == 1:
             return self.ariths[0].simplify()
         else:
             return [s.simplify() for s in self.ariths]
@@ -231,7 +272,7 @@ class ExprArith(Expression):
         self.terms = terms
 
     def simplify(self):
-        if len(self.terms) == 0:
+        if len(self.terms) == 1:
             return self.terms[0][1].simplify()
         else:
             res = [self.terms[0][1].simplify()]
@@ -245,7 +286,7 @@ class Term(Expression):
         self.factors = factors
 
     def simplify(self):
-        if len(self.factors) == 0:
+        if len(self.factors) == 1:
             return self.factors[0][1].simplify()
         else:
             res = [self.factors[0][1].simplify()]
@@ -276,7 +317,7 @@ class Power(Expression):
         self.atoms = atoms
 
     def simplify(self):
-        if len(self.atoms) == 0:
+        if len(self.atoms) == 1:
             return self.atoms[0].simplify()
         else:
             return [s.simplify for s in self.atoms]
@@ -297,6 +338,9 @@ class ExprAtom(Expression):
 class Atom(Expression):
     def __init__(self, code):
         self.code = code
+
+    def simplify(self):
+        return self.code
 
 
 class NodeLiteral(Expression):
