@@ -356,6 +356,9 @@ class Parser:
         self.check_pop(']')
         return Node.LiteralList(elems)
 
+    def parse_map(self) -> Node.LiteralMap:
+        pass
+
     def parse_trailer(self) -> Node.Trailer:
         res = None
         if self.top.code == '(':
@@ -388,5 +391,5 @@ def parse(code):
 
 if __name__ == '__main__':
     sim = parse('''
-    a.append(1);''')
+    a + [];''')
     print(sim)
