@@ -48,7 +48,7 @@ def parse_comment(code: str) -> (Token, int):
     code_value = code[1]
     i = 0
 
-    if not code_value in '/*':
+    if code_value not in '/*':
         i = 0
 
     if code_value == '/':
@@ -69,15 +69,14 @@ def parse_string(code: str) -> (Token, int):
     res = ''
     i = 1
     while i < len(code) and code[i] != '"':
-        if code[i] != '\\':
+        if code[i] == '\\':
+            i += 1
+            decode = decode_escape(code[i])
+            if decode is None:
+                return Token(None, TokenType.ERROR), i
+            res += decode
+        else:
             res += code[i]
-
-        i += 1
-        decode = decode_escape(code[i])
-        if decode is None:
-            return Token(None, TokenType.ERROR), i
-
-        res += decode
         i += 1
 
     return Token(res, TokenType.STRING), i+1
