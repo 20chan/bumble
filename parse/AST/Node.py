@@ -368,7 +368,7 @@ class LiteralTuple(Atom):
         if len(self.elems) == 0:
             return ["(", ")"]
         else:
-            return ["("] + [s.simplify() for s in self.elems] + [")"]
+            return ["(", *[s.simplify() for s in self.elems], ")"]
 
 
 class LiteralList(Atom):
@@ -376,10 +376,15 @@ class LiteralList(Atom):
         self.elems = elems
 
     def simplify(self):
-        if len(self.elems) == 0:
-            return ["[", "]"]
-        else:
-            return ["["] + [s.simplify() for s in self.elems] + ["]"]
+        return ["[", *[s.simplify() for s in self.elems], "]"]
+
+
+class LiteralMap(Atom):
+    def __init__(self, dic):
+        self.dic = dic
+
+    def simplify(self):
+        return ["{", *[(k.simplify(), v.simplify() for k, v in self.dic)],"}"]
 
 
 class Trailer(Node):
@@ -394,7 +399,7 @@ class TrailerCall(Trailer):
         if len(self.exprs) == 0:
             return ["(", ")"]
         else:
-            return ["("] + [s.simplify() for s in self.exprs] + [")"]
+            return ["(", *[s.simplify() for s in self.exprs], ")"]
 
 
 class TrailerIndex(Trailer):
@@ -405,7 +410,7 @@ class TrailerIndex(Trailer):
         if len(self.exprs) == 0:
             return ["[", "]"]
         else:
-            return ["["] + [s.simplify() for s in self.exprs] + ["]"]
+            return ["[", *[s.simplify() for s in self.exprs], "]"]
 
 
 class TrailerDot(Trailer):
