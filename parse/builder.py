@@ -281,7 +281,7 @@ class Parser:
 
     def parse_list_expr(self) -> Node.ExprList:
         pipes = [(None, self.parse_pipe_expr())]
-        while self.top.code in [":", "++"]:
+        while self.top.code == "++":
             tok = self.pop_tok().code
             pipes.append((tok, self.parse_pipe_expr()))
 
@@ -357,7 +357,23 @@ class Parser:
         return Node.LiteralList(elems)
 
     def parse_map(self) -> Node.LiteralMap:
-        pass
+        self.check_pop('{')
+        dic = []
+        if self.top.code != '}':
+            key = self.parse_expr()
+            self.check_pop(':')
+            value = self.parse_expr()
+            dic.append((key, value))
+
+            while self.top.code == ',':
+                self.check_pop(',')
+                key = self.parse_expr()
+                self.check_pop(':')
+                value = self.parse_expr()
+                dic.append((key, value))
+
+        self.check_pop('}')
+        return Node.LiteralMap(dic)
 
     def parse_trailer(self) -> Node.Trailer:
         res = None
@@ -391,5 +407,6 @@ def parse(code):
 
 if __name__ == '__main__':
     sim = parse('''
-    a + [];''')
+    w = {a:b, c:d};
+    ''')
     print(sim)
