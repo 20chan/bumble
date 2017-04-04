@@ -333,8 +333,26 @@ class Parser:
         return Node.ExprAtom(atom, trailers)
 
     def parse_atom(self) -> Node.Atom:
-        # TODO: 아톰 구현!!!!!!!!!!!
-        return Node.Atom(self.pop_tok().code)
+        if self.top.code == '(':
+            return self.parse_tuple()
+        if self.top.code == '[':
+            return self.parse_list()
+        if self.top.code == '{':
+            return self.parse_map()
+
+        return Node.AtomLiteral(self.pop_tok())
+
+    def parse_tuple(self) -> Node.LiteralTuple:
+        self.check_pop('(')
+        elems = self.parse_exprs()
+        self.check_pop(')')
+        return Node.LiteralTuple(elems)
+
+    def parse_list(self) -> Node.LiteralList:
+        self.check_pop('[')
+        elems = self.parse_exprs()
+        self.check_pop(']')
+        return Node.LiteralList(elems)
 
     def parse_trailer(self) -> Node.Trailer:
         res = None
@@ -353,7 +371,7 @@ class Parser:
         return res
 
     def parse_exprs(self) -> List[Node.Expression]:
-        if self.top.code == ')':
+        if self.top.code in [')', ']', '}']:
             return []
         res = [self.parse_expr()]
         while self.top.code == ',':
@@ -367,5 +385,5 @@ def parse(code):
     return Parser(code).parse().simplify()
 
 if __name__ == '__main__':
-    sim = parse('"123";')
+    sim = parse('1 != [1, 2, 3][0];')
     print(sim)

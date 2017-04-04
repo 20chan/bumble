@@ -5,7 +5,7 @@ class Node:
     def __repr__(self):
         return '<{}>'.format(type(self).__name__)
 
-    def simplify(self):
+    def simplify(self) -> List:
         pass
 
 
@@ -339,25 +339,38 @@ class ExprAtom(Expression):
 
 
 class Atom(Expression):
-    def __init__(self, code):
-        self.code = code
-
-    def simplify(self):
-        return self.code
-
-
-class AtomLiteral(Expression):
     pass
 
 
-class AtomInteger(AtomLiteral):
-    def __init__(self, val):
-        self.val = val
+class AtomLiteral(Atom):
+    def __init__(self, tok):
+        self.val = tok.code
+        self.type = tok.type
+
+    def simplify(self):
+        return self.val
 
 
-class AtomString(AtomLiteral):
-    def __init__(self, val):
-        self.val = val
+class LiteralTuple(Atom):
+    def __init__(self, elems):
+        self.elems = elems
+
+    def simplify(self):
+        if len(self.elems) == 0:
+            return ["(", ")"]
+        else:
+            return ["("] + [s.simplify() for s in self.elems] + [")"]
+
+
+class LiteralList(Atom):
+    def __init__(self, elems):
+        self.elems = elems
+
+    def simplify(self):
+        if len(self.elems) == 0:
+            return ["[", "]"]
+        else:
+            return ["["] + [s.simplify() for s in self.elems] + ["]"]
 
 
 class Trailer(Node):
