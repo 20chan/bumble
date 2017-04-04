@@ -384,7 +384,7 @@ class LiteralMap(Atom):
         self.dic = dic
 
     def simplify(self):
-        return ["{", *[(k.simplify(), v.simplify() for k, v in self.dic)],"}"]
+        return ["{", *[(k.simplify(), v.simplify()) for k, v in self.dic], "}"]
 
 
 class Trailer(Node):
