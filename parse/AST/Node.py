@@ -163,11 +163,6 @@ class NodeBind(Expression):
         return [self.left.simplify(), ":=", self.right.simplify()]
 
 
-class NodeCall(Expression):
-    def __init__(self, expr):
-        self.expr = expr
-
-
 class ExprWildcard(Expression):
     def __init__(self):
         pass
@@ -351,14 +346,18 @@ class Atom(Expression):
         return self.code
 
 
-class NodeLiteral(Expression):
+class AtomLiteral(Expression):
+    pass
+
+
+class AtomInteger(AtomLiteral):
     def __init__(self, val):
         self.val = val
 
 
-class NodeInteger(NodeLiteral):
+class AtomString(AtomLiteral):
     def __init__(self, val):
-        NodeLiteral.__init__(self, val)
+        self.val = val
 
 
 class Trailer(Node):

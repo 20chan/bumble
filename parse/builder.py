@@ -48,8 +48,8 @@ class Parser:
             return self.parse_func()
         if self.top.type == TokenType.VAR:
             return self.parse_var()
-        if self.top.type == TokenType.IDENTIFIER:
-            return self.parse_id()
+        # if self.top.type == TokenType.IDENTIFIER:
+        return self.parse_id()
 
     def parse_block(self) -> List[Node.Sentence]:
         res = []
@@ -208,11 +208,6 @@ class Parser:
         if self.top.type == TokenType.BIND:
             return self.parse_bind(identifier)
 
-        # 여기서, parse_expr()의 결과는 parse_call을 필요로 하지 않는다
-        # 그래서 그냥 check_pop(';')를 실행함
-        # 근데 1; 같은거는..?
-        # ;ㅅ; 살려줘
-
         return self.parse_call(identifier)
 
     def parse_assign(self, ide) -> Node.NodeAssign:
@@ -231,10 +226,10 @@ class Parser:
 
         return Node.NodeBind(left, right)
 
-    def parse_call(self, ide) -> Node.NodeCall:
+    def parse_call(self, ide) -> Node.Expression:
         self.check_pop(';')
 
-        return Node.NodeCall(ide)
+        return ide
 
     def parse_expr(self) -> Node.Expression:
         # TODO: parse lambda
@@ -367,9 +362,10 @@ class Parser:
 
         return res
 
-# HACK: 1+1*1 파싱하면 무한루프돔
+
+def parse(code):
+    return Parser(code).parse().simplify()
+
 if __name__ == '__main__':
-    p = Parser('a=1+1;')
-    result = p.parse()
-    sim = result.simplify()
+    sim = parse('"123";')
     print(sim)
