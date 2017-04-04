@@ -225,6 +225,7 @@ class ExprShift(Expression):
             for c in self.cmds[1:]:
                 res.append(c[0])
                 res.append(c[1].simplify())
+            return res
 
 
 class ExprCmd(Expression):
@@ -243,6 +244,7 @@ class ExprCmd(Expression):
             for l in self.lists[1:]:
                 res.append(l[0])
                 res.append(l[1].simplify())
+            return res
 
 
 class ExprList(Expression):
@@ -257,6 +259,7 @@ class ExprList(Expression):
             for l in self.pipes[1:]:
                 res.append(l[0])
                 res.append(l[1].simplify())
+            return res
 
 
 class ExprPipe(Expression):
@@ -297,6 +300,7 @@ class Term(Expression):
             for l in self.factors[1:]:
                 res.append(l[0])
                 res.append(l[1].simplify())
+            return res
 
 
 class Factor(Expression):
@@ -324,7 +328,7 @@ class Power(Expression):
         if len(self.atoms) == 1:
             return self.atoms[0].simplify()
         else:
-            return [s.simplify for s in self.atoms]
+            return [s.simplify() for s in self.atoms]
 
 
 class ExprAtom(Expression):
@@ -367,9 +371,9 @@ class TrailerCall(Trailer):
 
     def simplify(self):
         if len(self.exprs) == 0:
-            return self.exprs[0].simplify()
+            return ["(", ")"]
         else:
-            return [s.simplify() for s in self.exprs]
+            return ["("] + [s.simplify() for s in self.exprs] + [")"]
 
 
 class TrailerIndex(Trailer):
@@ -378,7 +382,7 @@ class TrailerIndex(Trailer):
 
     def simplify(self):
         if len(self.exprs) == 0:
-            return self.exprs[0].simplify()
+            return ["[", "]"]
         else:
             return ["["] + [s.simplify() for s in self.exprs] + ["]"]
 
