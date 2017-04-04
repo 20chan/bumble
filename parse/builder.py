@@ -387,5 +387,11 @@ def parse(code):
     return Parser(code).parse().simplify()
 
 if __name__ == '__main__':
-    sim = parse('match(1){1 then 1; _ then nothing;}')
+    sim = parse('''
+    a = -1;
+    match((1, 2)) {
+        (_, 2) then a = 1;
+        (2, _) then a = 2;
+        (_, _) then a = nothing;
+    }''')
     print(sim)

@@ -352,12 +352,10 @@ class AtomLiteral(Atom):
         self.type = tok.type
 
     def simplify(self):
-        if self.type == TokenType.INTEGER:
+        if self.type in [TokenType.IDENTIFIER, TokenType.INTEGER, TokenType.TRUE, TokenType.FALSE, TokenType.NOTHING]:
             return self.val
         if self.type == TokenType.STRING:
             return '"{}"'.format(self.val)
-        if self.type in [TokenType.TRUE, TokenType.FALSE, TokenType.NOTHING]:
-            return self.val
 
         raise Exception('Not literal')
 
