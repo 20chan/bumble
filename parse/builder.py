@@ -368,7 +368,7 @@ class Parser:
             self.check_pop(']')
         elif self.top.code == '.':
             self.check_pop('.')
-            res = Node.TrailerDot(self.pop_tok())
+            res = Node.TrailerDot(self.pop_tok().code)
 
         return res
 
@@ -388,10 +388,5 @@ def parse(code):
 
 if __name__ == '__main__':
     sim = parse('''
-    a = -1;
-    match((1, 2)) {
-        (_, 2) then a = 1;
-        (2, _) then a = 2;
-        (_, _) then a = nothing;
-    }''')
+    a.append(1);''')
     print(sim)
