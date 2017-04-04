@@ -1,4 +1,5 @@
 from typing import List, Tuple
+from parse.tok import TokenType
 
 
 class Node:
@@ -81,6 +82,9 @@ class StateMatch(Sentence):
     def __init__(self, cond, states):
         self.cond = cond
         self.states = states
+
+    def simplify(self):
+        return ["match", self.cond.simplify(), *[(p.simplify(), s.simplify()) for p, s in self.states]]
 
 
 class StateTry(Sentence):
@@ -348,7 +352,14 @@ class AtomLiteral(Atom):
         self.type = tok.type
 
     def simplify(self):
-        return self.val
+        if self.type == TokenType.INTEGER:
+            return self.val
+        if self.type == TokenType.STRING:
+            return '"{}"'.format(self.val)
+        if self.type in [TokenType.TRUE, TokenType.FALSE, TokenType.NOTHING]:
+            return self.val
+
+        raise Exception('Not literal')
 
 
 class LiteralTuple(Atom):

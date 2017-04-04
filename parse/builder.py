@@ -126,11 +126,12 @@ class Parser:
         self.check_pop('{')
         states = []
         while self.top.code != '}':
-            pat = self.parse_pattern()
+            pat = self.parse_expr()
             self.check_pop('then')
             stmt = self.parse_statement()
             states.append((pat, stmt))
 
+        self.check_pop('}')
         return Node.StateMatch(cond, states)
 
     def parse_try(self) -> Node.StateTry:
@@ -234,6 +235,7 @@ class Parser:
     def parse_expr(self) -> Node.Expression:
         # TODO: parse lambda
         if self.top.code == '_':
+            self.check_pop('_')
             return Node.ExprWildcard()
         return self.parse_or_expr()
 
@@ -385,5 +387,5 @@ def parse(code):
     return Parser(code).parse().simplify()
 
 if __name__ == '__main__':
-    sim = parse('1 != [1, 2, 3][0];')
+    sim = parse('match(1){1 then 1; _ then nothing;}')
     print(sim)
