@@ -1,4 +1,4 @@
-from machine.machine import Machine
+from machine.basic_machine import Machine
 from parse.tok import TokenType
 from parse.AST import Node
 from typing import Dict
@@ -55,11 +55,23 @@ class SimpleMachine(Machine):
     def visit(self, node: Node.Node):
         if isinstance(node, Node.StateImport):
             return self.visit_import(node)
+        if isinstance(node, Node.NodeAssign):
+            return self.visit_assign(node)
+        if isinstance(node, Node.DefVar):
+            return self.visit_def_var(node)
+
         if isinstance(node, Node.ExprOr):
             return self.visit_expr_or(node)
 
     def visit_import(self, node: Node.StateImport) -> None:
         pass
+
+    def visit_def_var(self, node: Node.DefVar) -> None:
+        self.table[node.name] = self.visit(node.value)
+
+    def visit_assign(self, node: Node.NodeAssign) -> Object:
+        self.table[node.left] = self.visit(node.right)
+        return self.table[node.left]
 
     def visit_if(self, node: Node.StateIf) -> None:
         if self.visit(node.cond):
@@ -118,18 +130,44 @@ class SimpleMachine(Machine):
     def visit_expr_arith(self, node: Node.ExprArith):
         if len(node.terms) == 1:
             return self.visit_term(node.terms[0])
+        else:
+            res = self.visit_factor(node.terms[0])
+            for op, fact in node.terms[1:]:
+                res.attrs[{'+': '_add',
+                           '-': '_sub'}[op]].trailer_call(res, fact)
+            return res
 
     def visit_term(self, node: Node.Term):
         if len(node.factors) == 1:
             return self.visit_factor(node.factors[0])
+        else:
+            res = self.visit_factor(node.factors[0])
+            for op, fact in node.factors[1:]:
+                res.attrs[{'*': '_mul',
+                           '/': '_div',
+                           '%': '_mod'}[op]].trailer_call(res, fact)
+            return res
 
     def visit_factor(self, node: Node.Factor):
         if len(node.factors) == 0:
             return self.visit_power(node.power)
+        else:
+            mul = 1
+            for f in node.factors:
+                if f == '-':
+                   mul *= -1
+            res = self.visit_power(node.power)
+            res.attrs['_mul'].trailer_call(res.value, res)
+            return res
 
     def visit_power(self, node: Node.Power):
         if len(node.atoms) == 1:
             return self.visit_expr_atom(node.atoms[0])
+        else:
+            res = self.visit_expr_xor(node.atoms[0])
+            for at in node.atoms[1:]:
+                res = res.attrs['_pow'].trailer_call(self.visit_expr_atom(at))
+            return res
 
     def visit_expr_atom(self, node: Node.ExprAtom):
         if len(node.trailers) == 0:
@@ -143,6 +181,7 @@ class SimpleMachine(Machine):
                     res = res.trailer_index(*[self.visit_expr_or(e) for e in t.exprs])
                 elif isinstance(t, Node.TrailerDot):
                     res = res.trailer_dot(t.ide)
+            return res
 
     def visit_atom(self, node: Node.Atom) -> Object:
         if isinstance(node, Node.AtomLiteral):
@@ -173,7 +212,8 @@ BUILT_IN_INT = Type('int', {
     '_sub': Variable('_sub', BUILT_IN_FUNC, lambda a, b: a-b),
     '_mul': Variable('_mul', BUILT_IN_FUNC, lambda a, b: a*b),
     '_div': Variable('_div', BUILT_IN_FUNC, lambda a, b: a/b),
-    '_mod': Variable('_mod', BUILT_IN_FUNC, lambda a, b: a%b)
+    '_mod': Variable('_mod', BUILT_IN_FUNC, lambda a, b: a%b),
+    '_pow': Variable('_pow', BUILT_IN_FUNC, lambda a, b: a**b)
 }, BUILT_IN_OBJECT)
 BUILT_IN_STRING = Type('string', {
     'operator+': Variable('operator+', BUILT_IN_FUNC, lambda a, b: a+b)
@@ -187,3 +227,16 @@ BUILT_IN_TUPLE = Type('tuple', {
 BUILT_IN_LIST = Type('list', {
     'get': Variable('get', BUILT_IN_FUNC, None)  # TODO: get 함수 구현
 })
+
+
+def execute(code):
+    from parse.builder import parse
+    m = SimpleMachine()
+    m.execute(parse(code))
+    return m
+
+if __name__ == '__main__':
+    m = execute('''
+    var a = 1 + 1
+    ''')
+    print(m)
