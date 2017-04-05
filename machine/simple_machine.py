@@ -7,13 +7,15 @@ from typing import Dict
 class Type:
     types = []
 
-    def __init__(self, name: str, attrs: Dict[str, Variable], parent=None):
+    def __init__(self, name: str, attrs, parent=None):
         self.name = name
-        self.attrs = parent.attrs
+        self.attrs = dict()
+        if parent is not None:
+            self.attrs = parent.attrs
         for key in attrs.keys():
             self.attrs[key] = attrs[key]
         self.parent = parent
-        Type.types += self
+        Type.types.append(self)
 
 
 class Object:
@@ -113,11 +115,11 @@ class SimpleMachine(Machine):
 
     def visit_expr_shift(self, node: Node.ExprShift):
         if len(node.cmds) == 1:
-            return self.visit_expr_cmd(node.cmds[0])
+            return self.visit_expr_cmd(node.cmds[0][1])
 
     def visit_expr_cmd(self, node: Node.ExprCmd):
         if len(node.lists) == 1:
-            return self.visit_expr_list(node.lists[0])
+            return self.visit_expr_list(node.lists[0][1])
 
     def visit_expr_list(self, node: Node.ExprList):
         if len(node.pipes) == 1:
@@ -129,19 +131,20 @@ class SimpleMachine(Machine):
 
     def visit_expr_arith(self, node: Node.ExprArith):
         if len(node.terms) == 1:
-            return self.visit_term(node.terms[0])
+            return self.visit_term(node.terms[0][1])
         else:
-            res = self.visit_factor(node.terms[0])
+            res = self.visit_term(node.terms[0][1])
             for op, fact in node.terms[1:]:
                 res.attrs[{'+': '_add',
-                           '-': '_sub'}[op]].trailer_call(res, fact)
+                           '-': '_sub'}[op]].trailer_call(res.value,
+                                                          self.visit_term(fact).value)
             return res
 
     def visit_term(self, node: Node.Term):
         if len(node.factors) == 1:
-            return self.visit_factor(node.factors[0])
+            return self.visit_factor(node.factors[0][1])
         else:
-            res = self.visit_factor(node.factors[0])
+            res = self.visit_factor(node.factors[0][1])
             for op, fact in node.factors[1:]:
                 res.attrs[{'*': '_mul',
                            '/': '_div',
@@ -237,6 +240,6 @@ def execute(code):
 
 if __name__ == '__main__':
     m = execute('''
-    var a = 1 + 1
+    var a = 1 + 1;
     ''')
     print(m)

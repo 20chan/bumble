@@ -296,10 +296,10 @@ class Parser:
         return Node.ExprCmd(lists)
 
     def parse_list_expr(self) -> Node.ExprList:
-        pipes = [(None, self.parse_pipe_expr())]
+        pipes = [self.parse_pipe_expr()]
         while self.top.code == "++":
-            tok = self.pop_tok().code
-            pipes.append((tok, self.parse_pipe_expr()))
+            self.check_pop('++')
+            pipes.append(self.parse_pipe_expr())
 
         return Node.ExprList(pipes)
 
@@ -419,10 +419,10 @@ class Parser:
 
 
 def parse(code):
-    return Parser(code).parse().simplify()
+    return Parser(code).parse()
 
 if __name__ == '__main__':
     sim = parse('''
     w = {a:b, c:d};
-    ''')
+    ''').simplify()
     print(sim)
