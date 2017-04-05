@@ -9,6 +9,9 @@ class Node:
     def simplify(self) -> List:
         pass
 
+    def validate(self):
+        pass
+
 
 class Statement(Node):
     def __init__(self, sentences):
