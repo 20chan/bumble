@@ -210,7 +210,7 @@ class Parser:
 
     def parse_var(self) -> Node.DefVar:
         self.check_pop('var')
-        name = self.pop_tok()
+        name = self.pop_tok().code
         if self.top.code == '=':
             self.check_pop('=')
             val = self.parse_expr()

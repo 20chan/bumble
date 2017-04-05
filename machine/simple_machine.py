@@ -134,22 +134,25 @@ class SimpleMachine(Machine):
             return self.visit_term(node.terms[0][1])
         else:
             res = self.visit_term(node.terms[0][1])
-            for op, fact in node.terms[1:]:
-                res.attrs[{'+': '_add',
-                           '-': '_sub'}[op]].trailer_call(res.value,
-                                                          self.visit_term(fact).value)
-            return res
+            new_val = res.value
+            for op, term in node.terms[1:]:
+                new_val = res.attrs[{'+': '_add',
+                                     '-': '_sub'}[op]].trailer_call(new_val,
+                                                                    self.visit_term(term).value)
+            return Literal(res.type, new_val)
 
     def visit_term(self, node: Node.Term):
         if len(node.factors) == 1:
             return self.visit_factor(node.factors[0][1])
         else:
             res = self.visit_factor(node.factors[0][1])
+            new_val = res.value
             for op, fact in node.factors[1:]:
-                res.attrs[{'*': '_mul',
-                           '/': '_div',
-                           '%': '_mod'}[op]].trailer_call(res, fact)
-            return res
+                new_val = res.attrs[{'*': '_mul',
+                                     '/': '_div',
+                                     '%': '_mod'}[op]].trailer_call(new_val,
+                                                                    self.visit_factor(fact).value)
+            return Literal(res.type, new_val)
 
     def visit_factor(self, node: Node.Factor):
         if len(node.factors) == 0:
@@ -167,9 +170,10 @@ class SimpleMachine(Machine):
         if len(node.atoms) == 1:
             return self.visit_expr_atom(node.atoms[0])
         else:
-            res = self.visit_expr_xor(node.atoms[0])
+            res = self.visit_expr_atom(node.atoms[0])
             for at in node.atoms[1:]:
-                res = res.attrs['_pow'].trailer_call(self.visit_expr_atom(at))
+                res.value = res.attrs['_pow'].trailer_call(res.value,
+                                                           self.visit_expr_atom(at).value)
             return res
 
     def visit_expr_atom(self, node: Node.ExprAtom):
@@ -240,6 +244,7 @@ def execute(code):
 
 if __name__ == '__main__':
     m = execute('''
-    var a = 1 + 1;
+    var a = 1 + 5 * 2 - 1;
+    var b = a ** 2;
     ''')
-    print(m)
+    print("a : {}, b : {}".format(m.table['a'].value, m.table['b'].value))
