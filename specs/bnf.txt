@@ -1,8 +1,9 @@
 <statement> := (<sentence> | "{" <sentence>* "}")
 <loop_sentence> := <sentence> | "skip" <expr>? ";" | "break" ";" |
 <loop_statement> := (<loop_sentence> | "{" <loop_sentence>* "}"
-<sentence> := <if> | <while> | <for> | <cond> | <match> | <try> | <enumdef> | <classdef> | <funcdef> | <vardef> | <assign> | <bind> | <call>
+<sentence> := <import> | <if> | <while> | <for> | <cond> | <match> | <try> | <enumdef> | <classdef> | <funcdef> | <vardef> | <assign> | <bind> | <call>
 
+<import> := "import" "(" IDENTIFIER ("." IDENTIFIER)* ")" ("as" IDENTIFIER)?
 <if> := "if" "(" <expr> ")" <statement>
         ("else" "if" "(" <expr> ")" <statement>)*
         ("else" <statement>)?

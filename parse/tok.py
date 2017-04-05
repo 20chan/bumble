@@ -2,7 +2,7 @@ from enum import Enum
 
 separators = '.,:;[]{}()'
 operator_unit = ':=+-*/%^&$|<>!'
-keywords = ['var', 'func', 'if', 'else', 'cond', 'then', 'match', 'while', 'for', 'in'
+keywords = ['var', 'func', 'import', 'if', 'else', 'cond', 'then', 'match', 'while', 'for', 'in'
             'return', 'yield', 'skip', 'break', 'nothing', 'true', 'false']
 
 
@@ -58,3 +58,5 @@ class TokenType(Enum):
     CATCH = 30
     FINALLY = 31
     ENUM = 32
+    IMPORT = 33
+    AS = 34
