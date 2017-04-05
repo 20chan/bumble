@@ -35,6 +35,18 @@ class Expression(Sentence):
     pass
 
 
+class StateImport(Sentence):
+    def __init__(self, name, as_name):
+        self.name = name
+        self.as_name = as_name
+
+    def simplify(self):
+        if self.as_name is None:
+            return ["import", self.name]
+        else:
+            return ["import", self.name, "as", self.as_name]
+
+
 class StateIf(Sentence):
     def __init__(self, cond: Expression, true_block: Statement, false_block: Statement):
         self.cond = cond

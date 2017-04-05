@@ -28,6 +28,8 @@ class Parser:
         assert(self.pop_tok().code == tok)
 
     def parse_sentence(self) -> Node.Sentence:
+        if self.top.type == TokenType.IMPORT:
+            return self.parse_import()
         if self.top.type == TokenType.IF:
             return self.parse_if()
         if self.top.type == TokenType.WHILE:
@@ -64,6 +66,20 @@ class Parser:
             return Node.Statement(self.parse_block())
         else:
             return Node.Statement(self.parse_sentence())
+
+    def parse_import(self) -> Node.StateImport:
+        self.check_pop('import')
+        name = self.pop_tok().code
+        as_name = None
+        while self.top.code == '.':
+            name += self.pop_tok().code
+            name += self.pop_tok().code
+
+        if self.top.code == 'as':
+            self.check_pop('as')
+            as_name = self.pop_tok().code
+
+        return Node.StateImport(name, as_name)
 
     def parse_if(self) -> Node.StateIf:
         self.check_pop('if')

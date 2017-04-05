@@ -124,6 +124,8 @@ def parse_identifier(code: str) -> (Token, int):
 
     syntax = code[:i]
     state_token = {
+        'import': TokenType.IMPORT,
+        'as': TokenType.AS,
         'if': TokenType.IF,
         'else': TokenType.ELSE,
         'match': TokenType.MATCH,
