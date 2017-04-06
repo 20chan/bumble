@@ -161,7 +161,7 @@ class SimpleMachine(Machine):
             mul = 1
             for f in node.factors:
                 if f == '-':
-                   mul *= -1
+                    mul *= -1
             res = self.visit_power(node.power)
             res.attrs['_mul'].trailer_call(res.value, res)
             return res
@@ -171,12 +171,13 @@ class SimpleMachine(Machine):
             return self.visit_expr_atom(node.atoms[0])
         else:
             res = self.visit_expr_atom(node.atoms[0])
+            new_val = res.value
             for at in node.atoms[1:]:
-                res.value = res.attrs['_pow'].trailer_call(res.value,
-                                                           self.visit_expr_atom(at).value)
-            return res
+                new_val = res.attrs['_pow'].trailer_call(res.value,
+                                                         self.visit_expr_atom(at).value)
+            return Literal(res.type, new_val)
 
-    def visit_expr_atom(self, node: Node.ExprAtom):
+    def visit_expr_atom(self, node: Node.ExprAtom) -> Object:
         if len(node.trailers) == 0:
             return self.visit_atom(node.atom)
         else:
