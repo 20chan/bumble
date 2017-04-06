@@ -267,13 +267,9 @@ class ExprList(Expression):
 
     def simplify(self):
         if len(self.pipes) == 1:
-            return self.pipes[0][1].simplify()
+            return self.pipes[0].simplify()
         else:
-            res = [self.pipes[0][1].simplify()]
-            for l in self.pipes[1:]:
-                res.append(l[0])
-                res.append(l[1].simplify())
-            return res
+            return [s.simplify() for s in self.pipes]
 
 
 class ExprPipe(Expression):
@@ -400,6 +396,10 @@ class LiteralMap(Atom):
 
     def simplify(self):
         return ["{", *[(k.simplify(), v.simplify()) for k, v in self.dic], "}"]
+
+
+class EmptyLiteral(Atom):
+    pass
 
 
 class Trailer(Node):

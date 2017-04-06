@@ -61,7 +61,6 @@ class SimpleMachine(Machine):
             return self.visit_assign(node)
         if isinstance(node, Node.DefVar):
             return self.visit_def_var(node)
-
         if isinstance(node, Node.ExprOr):
             return self.visit_expr_or(node)
 
@@ -206,6 +205,8 @@ class SimpleMachine(Machine):
             if node.type == TokenType.NOTHING:
                 raise NotImplementedError
         elif isinstance(node, Node.LiteralTuple):
+            if len(node.elems) == 1:
+                return self.visit_expr_or(node.elems[0])
             return Literal(BUILT_IN_TUPLE, tuple([self.visit_expr_or(e) for e in node.elems]))
         elif isinstance(node, Node.LiteralList):
             return Literal(BUILT_IN_LIST, [self.visit_expr_or(e) for e in node.elems])
@@ -245,7 +246,6 @@ def execute(code):
 
 if __name__ == '__main__':
     m = execute('''
-    var a = 1 + 5 * 2 - 1;
-    var b = a ** 2;
+    var a = 3*(1+1);
     ''')
-    print("a : {}, b : {}".format(m.table['a'].value, m.table['b'].value))
+    print("a : {}".format(m.table['a'].value))

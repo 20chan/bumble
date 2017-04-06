@@ -52,4 +52,4 @@
 <map> := "{" (<expr> ":" <expr>)? ("," <expr> ":" <expr>)* "}"
 
 <trailer> := ("(" <expr_list> ")") | ("[" <expr_list> "]") | "." IDENTIFIER
-<expr_list> := (<expr> ("," <expr>)*)?
+<expr_list> := (<expr> ("," <expr>)* ","?)?

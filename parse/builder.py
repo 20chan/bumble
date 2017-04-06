@@ -304,7 +304,7 @@ class Parser:
         return Node.ExprList(pipes)
 
     def parse_pipe_expr(self) -> Node.ExprPipe:
-        ariths = [ self.parse_arith_expr()]
+        ariths = [self.parse_arith_expr()]
         while self.top.code == '|>':
             ariths.append(self.parse_arith_expr())
 
@@ -360,10 +360,12 @@ class Parser:
 
         return Node.AtomLiteral(self.pop_tok())
 
-    def parse_tuple(self) -> Node.LiteralTuple:
+    def parse_tuple(self):
         self.check_pop('(')
         elems = self.parse_exprs()
         self.check_pop(')')
+        # if len(elems) == 1:
+        #    return Node.ExprOr(elems)
         return Node.LiteralTuple(elems)
 
     def parse_list(self) -> Node.LiteralList:
@@ -413,7 +415,10 @@ class Parser:
         res = [self.parse_expr()]
         while self.top.code == ',':
             self.check_pop(',')
-            res.append(self.parse_expr())
+            if self.top.code in [')', ']', '}']:
+                res.append(Node.EmptyLiteral())
+            else:
+                res.append(self.parse_expr())
 
         return res
 
