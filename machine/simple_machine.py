@@ -39,6 +39,9 @@ class Variable(Object):
         self.name = name
         Object.__init__(self, typ, value)
 
+    def __repr__(self):
+        return '{}: {}'.format(self.name, self.value)
+
 
 class Literal(Object):
     def __init__(self, typ: Type, value):
@@ -162,8 +165,8 @@ class SimpleMachine(Machine):
                 if f == '-':
                     mul *= -1
             res = self.visit_power(node.power)
-            res.attrs['_mul'].trailer_call(res.value, res)
-            return res
+            val = res.attrs['_mul'].trailer_call(res.value, mul)
+            return Literal(res.type, val)
 
     def visit_power(self, node: Node.Power):
         if len(node.atoms) == 1:
@@ -207,7 +210,8 @@ class SimpleMachine(Machine):
         elif isinstance(node, Node.LiteralTuple):
             if len(node.elems) == 1:
                 return self.visit_expr_or(node.elems[0])
-            return Literal(BUILT_IN_TUPLE, tuple([self.visit_expr_or(e) for e in node.elems]))
+            return Literal(BUILT_IN_TUPLE,
+                           tuple([self.visit_expr_or(e) for e in node.elems if not isinstance(e, Node.EmptyLiteral)]))
         elif isinstance(node, Node.LiteralList):
             return Literal(BUILT_IN_LIST, [self.visit_expr_or(e) for e in node.elems])
 
@@ -246,6 +250,12 @@ def execute(code):
 
 if __name__ == '__main__':
     m = execute('''
-    var a = 3*(1+1);
+    var a = 10**2+(2*10);
+    var b = a + (-(+(-1000)));
+    var c = b + (-a);
+    1;
+
     ''')
-    print("a : {}".format(m.table['a'].value))
+
+    for k in m.table.keys():
+        print('{}: {}'.format(k, m.table[k].value))
