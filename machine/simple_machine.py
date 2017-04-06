@@ -2,9 +2,26 @@ from machine.basic_machine import Machine
 from parse.tok import TokenType
 from parse.AST import Node
 from typing import Dict
+from copy import deepcopy
 
 
-class Type:
+class Object:
+    def __init__(self, typ, value):
+        self.type = typ
+        self.value = value
+        self.attrs: Dict[str, Variable] = typ.attrs
+
+    def trailer_call(self, *args):
+        return self.value(*args)
+
+    def trailer_index(self, args):
+        return self.attrs['get'].trailer_call(self, args)
+
+    def trailer_dot(self, name):
+        return self.attrs[name]
+
+
+class Type(Object):
     types = []
 
     def __init__(self, name: str, attrs, parent=None):
@@ -16,22 +33,8 @@ class Type:
             self.attrs[key] = attrs[key]
         self.parent = parent
         Type.types.append(self)
-
-
-class Object:
-    def __init__(self, typ: Type, value):
-        self.type = typ
-        self.value = value
-        self.attrs: Dict[str, Variable] = typ.attrs
-
-    def trailer_call(self, *args):
-        return self.value(*args)
-
-    def trailer_index(self, args):
-        return self.attrs['get'].trailer_call(self.value, args)
-
-    def trailer_dot(self, name):
-        return self.attrs[name]
+        self.value = self
+        Object.__init__(self, self, self)
 
 
 class Variable(Object):
@@ -100,22 +103,22 @@ class SimpleMachine(Machine):
             return self.visit_expr_and(node.ands[0])
         else:
             res = self.visit_expr_and(node.ands[0])
-            new_value = res.value
+            new_value = deepcopy(res)
             for i in range(1, len(node.ands)):
-                new_value = res.attrs['_or'].trailer_call(new_value,
-                                                          self.visit_expr_and(node.ands[i]).value)
-            return Literal(res.type, new_value)
+                new_value.value = res.attrs['_or'].trailer_call(new_value,
+                                                                self.visit_expr_and(node.ands[i]))
+            return new_value
 
     def visit_expr_and(self, node: Node.ExprAnd):
         if len(node.xors) == 1:
             return self.visit_expr_xor(node.xors[0])
         else:
             res = self.visit_expr_xor(node.xors[0])
-            new_value = res.value
+            new_value = deepcopy(res)
             for i in range(1, len(node.xors)):
-                new_value = res.attrs['_and'].trailer_call(new_value,
-                                                           self.visit_expr_xor(node.xors[i]).value)
-            return Literal(res.type, new_value)
+                new_value.value = res.attrs['_and'].trailer_call(new_value,
+                                                                 self.visit_expr_xor(node.xors[i]))
+            return new_value
 
     def visit_expr_xor(self, node: Node.ExprXor):
         if len(node.shifts) == 1:
@@ -142,25 +145,25 @@ class SimpleMachine(Machine):
             return self.visit_term(node.terms[0][1])
         else:
             res = self.visit_term(node.terms[0][1])
-            new_val = res.value
+            new_val = deepcopy(res)
             for op, term in node.terms[1:]:
-                new_val = res.attrs[{'+': '_add',
-                                     '-': '_sub'}[op]].trailer_call(new_val,
-                                                                    self.visit_term(term).value)
-            return Literal(res.type, new_val)
+                new_val.value = res.attrs[{'+': '_add',
+                                           '-': '_sub'}[op]].trailer_call(new_val,
+                                                                          self.visit_term(term))
+            return new_val
 
     def visit_term(self, node: Node.Term):
         if len(node.factors) == 1:
             return self.visit_factor(node.factors[0][1])
         else:
             res = self.visit_factor(node.factors[0][1])
-            new_val = res.value
+            new_val = deepcopy(res)
             for op, fact in node.factors[1:]:
-                new_val = res.attrs[{'*': '_mul',
-                                     '/': '_div',
-                                     '%': '_mod'}[op]].trailer_call(new_val,
-                                                                    self.visit_factor(fact).value)
-            return Literal(res.type, new_val)
+                new_val.value = res.attrs[{'*': '_mul',
+                                           '/': '_div',
+                                           '%': '_mod'}[op]].trailer_call(new_val,
+                                                                          self.visit_factor(fact))
+            return new_val
 
     def visit_factor(self, node: Node.Factor):
         if len(node.factors) == 0:
@@ -171,7 +174,7 @@ class SimpleMachine(Machine):
                 if f == '-':
                     mul *= -1
             res = self.visit_power(node.power)
-            val = res.attrs['_mul'].trailer_call(res.value, mul)
+            val = res.attrs['_mul'].trailer_call(res, Literal(BUILT_IN_INT, mul))
             return Literal(res.type, val)
 
     def visit_power(self, node: Node.Power):
@@ -179,30 +182,26 @@ class SimpleMachine(Machine):
             return self.visit_expr_atom(node.atoms[0])
         else:
             res = self.visit_expr_atom(node.atoms[0])
-            new_val = res.value
+            new_val = deepcopy(res)
             for at in node.atoms[1:]:
-                new_val = res.attrs['_pow'].trailer_call(res.value,
-                                                         self.visit_expr_atom(at).value)
-            return Literal(res.type, new_val)
+                new_val.value = res.attrs['_pow'].trailer_call(res,
+                                                               self.visit_expr_atom(at))
+            return new_val
 
     def visit_expr_atom(self, node: Node.ExprAtom) -> Object:
         if len(node.trailers) == 0:
             return self.visit_atom(node.atom)
         else:
             res = self.visit_atom(node.atom)
-            new_value = None
+            new_value = deepcopy(res)
             for t in node.trailers:
                 if isinstance(t, Node.TrailerDot) and isinstance(res, Type):
-                    new_value = res.attrs[t.ide]
+                    new_value = new_value.attrs[t.ide]
                     continue
-                if new_value is None:
-                    new_value = Literal(res.type, res.value)
-                else:
-                    new_value = Literal(new_value.type, new_value.value)
                 if isinstance(t, Node.TrailerCall):
-                    new_value.value = new_value.trailer_call(*[self.visit_expr_or(e).value for e in t.exprs])
+                    new_value.value = new_value.trailer_call(*[self.visit_expr_or(e) for e in t.exprs])
                 elif isinstance(t, Node.TrailerIndex):
-                    new_value.value = new_value.trailer_index(*[self.visit_expr_or(e).value for e in t.exprs])
+                    new_value.value = new_value.trailer_index(*[self.visit_expr_or(e) for e in t.exprs])
                 elif isinstance(t, Node.TrailerDot):
                     new_value.value = new_value.trailer_dot(t.ide)
             return new_value
@@ -235,29 +234,29 @@ BUILT_IN_OBJECT = Type('object', {
     'to_str': Variable('to_str', BUILT_IN_FUNC, lambda a: str(a)),
 })
 BUILT_IN_INT = Type('int', {
-    '_add': Variable('_add', BUILT_IN_FUNC, lambda a, b: a+b),
-    '_sub': Variable('_sub', BUILT_IN_FUNC, lambda a, b: a-b),
-    '_mul': Variable('_mul', BUILT_IN_FUNC, lambda a, b: a*b),
-    '_div': Variable('_div', BUILT_IN_FUNC, lambda a, b: a/b),
-    '_mod': Variable('_mod', BUILT_IN_FUNC, lambda a, b: a%b),
-    '_pow': Variable('_pow', BUILT_IN_FUNC, lambda a, b: a**b)
+    '_add': Variable('_add', BUILT_IN_FUNC, lambda a, b: a.value+b.value),
+    '_sub': Variable('_sub', BUILT_IN_FUNC, lambda a, b: a.value-b.value),
+    '_mul': Variable('_mul', BUILT_IN_FUNC, lambda a, b: a.value*b.value),
+    '_div': Variable('_div', BUILT_IN_FUNC, lambda a, b: a.value/b.value),
+    '_mod': Variable('_mod', BUILT_IN_FUNC, lambda a, b: a.value%b.value),
+    '_pow': Variable('_pow', BUILT_IN_FUNC, lambda a, b: a.value**b.value)
 }, BUILT_IN_OBJECT)
 BUILT_IN_STRING = Type('string', {
-    '_add': Variable('_add', BUILT_IN_FUNC, lambda a, b: a+b)
-})
+    '_add': Variable('_add', BUILT_IN_FUNC, lambda a, b: a.value+b.value)
+}, BUILT_IN_OBJECT)
 BUILT_IN_BOOL = Type('bool', {
-    '_or': Variable('_or', BUILT_IN_FUNC, lambda a, b: a or b)
-})
+    '_or': Variable('_or', BUILT_IN_FUNC, lambda a, b: a.value or b.value)
+}, BUILT_IN_OBJECT)
 BUILT_IN_TUPLE = Type('tuple', {
-    'get': Variable('get', BUILT_IN_FUNC, lambda a, b: a[b])  # TODO: get 함수 구현
-})
+    'get': Variable('get', BUILT_IN_FUNC, lambda a, b: a.value[b.value])  # TODO: get 함수 구현
+}, BUILT_IN_OBJECT)
 BUILT_IN_LIST = Type('list', {
-    'get': Variable('get', BUILT_IN_FUNC, lambda a, b: a[b])  # TODO: get 함수 구현
-})
+    'get': Variable('get', BUILT_IN_FUNC, lambda a, b: a.value[b.value])  # TODO: get 함수 구현
+}, BUILT_IN_OBJECT)
 
 GLOBAL_VARIABLES = [
     Type('system', {
-        'print': Variable('print', BUILT_IN_FUNC, lambda a: print(a))
+        'print': Variable('print', BUILT_IN_FUNC, lambda a: print(a.value))
     }, BUILT_IN_OBJECT)
 ]
 
@@ -276,6 +275,6 @@ if __name__ == '__main__':
     c = '''
     var a = [[1,2,3],[4,5,6],[7,8,9]][1];
     system.print(a);
-    system.print("출력된다~~~~");
+    system.print(a.to_str());
     '''
     main(c)
