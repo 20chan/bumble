@@ -273,6 +273,6 @@ def main(code):
 
 if __name__ == '__main__':
     c = '''
-    system.print("wow".to_str());
+    system.print(1/2);
     '''
     main(c)

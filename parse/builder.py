@@ -428,6 +428,6 @@ def parse(code):
 
 if __name__ == '__main__':
     sim = parse('''
-    w = {a:b, c:d};
+    do(1/2);
     ''').simplify()
     print(sim)

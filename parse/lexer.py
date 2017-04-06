@@ -49,7 +49,7 @@ def parse_comment(code: str) -> (Token, int):
     i = 0
 
     if code_value not in '/*':
-        i = 0
+        return parse_operator(code)
 
     if code_value == '/':
         i = 2
