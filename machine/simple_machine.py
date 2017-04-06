@@ -203,7 +203,7 @@ class SimpleMachine(Machine):
                 elif isinstance(t, Node.TrailerIndex):
                     new_value.value = new_value.trailer_index(*[self.visit_expr_or(e) for e in t.exprs])
                 elif isinstance(t, Node.TrailerDot):
-                    new_value.value = new_value.trailer_dot(t.ide)
+                    new_value = new_value.trailer_dot(t.ide)
             return new_value
 
     def visit_atom(self, node: Node.Atom) -> Object:
@@ -273,8 +273,6 @@ def main(code):
 
 if __name__ == '__main__':
     c = '''
-    var a = [[1,2,3],[4,5,6],[7,8,9]][1];
-    system.print(a);
-    system.print(a.to_str());
+    system.print("wow".to_str());
     '''
     main(c)
