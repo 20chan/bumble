@@ -28,7 +28,7 @@ class Object:
         return self.value(*args)
 
     def trailer_index(self, args):
-        return self.attrs['get'].trailer_call(args)
+        return self.attrs['get'].trailer_call(self.value, args)
 
     def trailer_dot(self, name):
         return self.attrs[name]
@@ -49,8 +49,10 @@ class Literal(Object):
 
 
 class SimpleMachine(Machine):
-    def __init__(self):
+    def __init__(self, global_vars):
         self.table = {}
+        for gv in global_vars:
+            self.table[gv.name] = gv
 
     def execute(self, node: Node.Statement):
         for s in node.sentences:
@@ -98,18 +100,22 @@ class SimpleMachine(Machine):
             return self.visit_expr_and(node.ands[0])
         else:
             res = self.visit_expr_and(node.ands[0])
+            new_value = res.value
             for i in range(1, len(node.ands)):
-                res = res.attrs['_or'].trailer_call(self.visit_expr_and(node.ands[i]))
-            return res
+                new_value = res.attrs['_or'].trailer_call(new_value,
+                                                          self.visit_expr_and(node.ands[i]).value)
+            return Literal(res.type, new_value)
 
     def visit_expr_and(self, node: Node.ExprAnd):
         if len(node.xors) == 1:
             return self.visit_expr_xor(node.xors[0])
         else:
             res = self.visit_expr_xor(node.xors[0])
+            new_value = res.value
             for i in range(1, len(node.xors)):
-                res = res.attrs['_and'].trailer_call(self.visit_expr_xor(node.xors[i]))
-            return res
+                new_value = res.attrs['_and'].trailer_call(new_value,
+                                                           self.visit_expr_xor(node.xors[i]).value)
+            return Literal(res.type, new_value)
 
     def visit_expr_xor(self, node: Node.ExprXor):
         if len(node.shifts) == 1:
@@ -184,14 +190,22 @@ class SimpleMachine(Machine):
             return self.visit_atom(node.atom)
         else:
             res = self.visit_atom(node.atom)
+            new_value = None
             for t in node.trailers:
+                if isinstance(t, Node.TrailerDot) and isinstance(res, Type):
+                    new_value = res.attrs[t.ide]
+                    continue
+                if new_value is None:
+                    new_value = Literal(res.type, res.value)
+                else:
+                    new_value = Literal(new_value.type, new_value.value)
                 if isinstance(t, Node.TrailerCall):
-                    res = res.trailer_call(*[self.visit_expr_or(e) for e in t.exprs])
+                    new_value.value = new_value.trailer_call(*[self.visit_expr_or(e).value for e in t.exprs])
                 elif isinstance(t, Node.TrailerIndex):
-                    res = res.trailer_index(*[self.visit_expr_or(e) for e in t.exprs])
+                    new_value.value = new_value.trailer_index(*[self.visit_expr_or(e).value for e in t.exprs])
                 elif isinstance(t, Node.TrailerDot):
-                    res = res.trailer_dot(t.ide)
-            return res
+                    new_value.value = new_value.trailer_dot(t.ide)
+            return new_value
 
     def visit_atom(self, node: Node.Atom) -> Object:
         if isinstance(node, Node.AtomLiteral):
@@ -211,9 +225,9 @@ class SimpleMachine(Machine):
             if len(node.elems) == 1:
                 return self.visit_expr_or(node.elems[0])
             return Literal(BUILT_IN_TUPLE,
-                           tuple([self.visit_expr_or(e) for e in node.elems if not isinstance(e, Node.EmptyLiteral)]))
+                           tuple([self.visit_expr_or(e).value for e in node.elems if not isinstance(e, Node.EmptyLiteral)]))
         elif isinstance(node, Node.LiteralList):
-            return Literal(BUILT_IN_LIST, [self.visit_expr_or(e) for e in node.elems])
+            return Literal(BUILT_IN_LIST, [self.visit_expr_or(e).value for e in node.elems])
 
 BUILT_IN_CLASS = Type('class', dict())
 BUILT_IN_FUNC = Type('function', dict())
@@ -229,33 +243,39 @@ BUILT_IN_INT = Type('int', {
     '_pow': Variable('_pow', BUILT_IN_FUNC, lambda a, b: a**b)
 }, BUILT_IN_OBJECT)
 BUILT_IN_STRING = Type('string', {
-    'operator+': Variable('operator+', BUILT_IN_FUNC, lambda a, b: a+b)
+    '_add': Variable('_add', BUILT_IN_FUNC, lambda a, b: a+b)
 })
 BUILT_IN_BOOL = Type('bool', {
     '_or': Variable('_or', BUILT_IN_FUNC, lambda a, b: a or b)
 })
 BUILT_IN_TUPLE = Type('tuple', {
-    'get': Variable('get', BUILT_IN_FUNC, None)  # TODO: get 함수 구현
+    'get': Variable('get', BUILT_IN_FUNC, lambda a, b: a[b])  # TODO: get 함수 구현
 })
 BUILT_IN_LIST = Type('list', {
-    'get': Variable('get', BUILT_IN_FUNC, None)  # TODO: get 함수 구현
+    'get': Variable('get', BUILT_IN_FUNC, lambda a, b: a[b])  # TODO: get 함수 구현
 })
+
+GLOBAL_VARIABLES = [
+    Type('system', {
+        'print': Variable('print', BUILT_IN_FUNC, lambda a: print(a))
+    }, BUILT_IN_OBJECT)
+]
 
 
 def execute(code):
     from parse.builder import parse
-    m = SimpleMachine()
+    m = SimpleMachine(GLOBAL_VARIABLES)
     m.execute(parse(code))
     return m
 
+
+def main(code):
+    m = execute(code)
+
 if __name__ == '__main__':
-    m = execute('''
-    var a = 10**2+(2*10);
-    var b = a + (-(+(-1000)));
-    var c = b + (-a);
-    1;
-
-    ''')
-
-    for k in m.table.keys():
-        print('{}: {}'.format(k, m.table[k].value))
+    c = '''
+    var a = [[1,2,3],[4,5,6],[7,8,9]][1];
+    system.print(a);
+    system.print("출력된다~~~~");
+    '''
+    main(c)
