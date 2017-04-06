@@ -4,6 +4,8 @@ from parse.AST import Node
 from typing import Dict
 from copy import deepcopy
 
+# 이거 내일 일어나면 다 갈아 엎고 다시 짜자
+
 
 class Object:
     def __init__(self, typ, value):
@@ -44,6 +46,9 @@ class Variable(Object):
 
     def __repr__(self):
         return '{}: {}'.format(self.name, self.value)
+
+    def trailer_call(self, parent, *args):
+        return self.value(parent, *args)
 
 
 class Literal(Object):
@@ -269,10 +274,10 @@ def execute(code):
 
 
 def main(code):
-    m = execute(code)
+    execute(code)
 
 if __name__ == '__main__':
     c = '''
-    system.print(1/2);
+    system.print("str".to_str());
     '''
     main(c)
