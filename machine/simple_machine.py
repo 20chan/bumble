@@ -1,66 +1,52 @@
 from machine.basic_machine import Machine
 from parse.tok import TokenType
 from parse.AST import Node
-from typing import Dict
-from copy import deepcopy
-
-# 이거 내일 일어나면 다 갈아 엎고 다시 짜자
+from typing import List, Dict
 
 
-class Object:
-    def __init__(self, typ, value):
+class Symbol:
+    def __init__(self, name, typ=None, value=None):
+        self.name = name
         self.type = typ
         self.value = value
-        self.attrs: Dict[str, Variable] = typ.attrs
-
-    def trailer_call(self, *args):
-        return self.value(*args)
-
-    def trailer_index(self, args):
-        return self.attrs['get'].trailer_call(self, args)
-
-    def trailer_dot(self, name):
-        return self.attrs[name]
 
 
-class Type(Object):
-    types = []
-
-    def __init__(self, name: str, attrs, parent=None):
-        self.name = name
-        self.attrs = dict()
-        if parent is not None:
-            self.attrs = parent.attrs
-        for key in attrs.keys():
-            self.attrs[key] = attrs[key]
-        self.parent = parent
-        Type.types.append(self)
-        self.value = self
-        Object.__init__(self, self, self)
+class VarSymbol(Symbol):
+    def __init__(self, name, typ, value=None):
+        Symbol.__init__(self, name, typ, value)
 
 
-class Variable(Object):
-    def __init__(self, name: str, typ: Type, value):
-        self.name = name
-        Object.__init__(self, typ, value)
-
-    def __repr__(self):
-        return '{}: {}'.format(self.name, self.value)
-
-    def trailer_call(self, parent, *args):
-        return self.value(parent, *args)
+class LiteralSymbol(Symbol):
+    def __init__(self, typ, value):
+        Symbol.__init__(self, None, typ, value)
 
 
-class Literal(Object):
-    def __init__(self, typ: Type, value):
-        Object.__init__(self, typ, value)
+class BuiltinTypeSymbol(Symbol):
+    def __init__(self, name):
+        Symbol.__init__(self, name)
+
+
+class SymbolTable:
+    def __init__(self):
+        from collections import OrderedDict
+        self._symbols = OrderedDict()
+        self._init_builtins()
+
+    def _init_builtins(self):
+        types = ['INTEGER', 'REAL', 'STRING', 'BOOL']
+        for typ in types:
+            self.define(BuiltinTypeSymbol(typ))
+
+    def define(self, symbol):
+        self._symbols[symbol.name] = symbol
+
+    def __getitem__(self, name) -> Symbol:
+        return self._symbols[name]
 
 
 class SimpleMachine(Machine):
-    def __init__(self, global_vars):
-        self.table = {}
-        for gv in global_vars:
-            self.table[gv.name] = gv
+    def __init__(self):
+        self.table = SymbolTable()
 
     def execute(self, node: Node.Statement):
         for s in node.sentences:
@@ -232,52 +218,3 @@ class SimpleMachine(Machine):
                            tuple([self.visit_expr_or(e).value for e in node.elems if not isinstance(e, Node.EmptyLiteral)]))
         elif isinstance(node, Node.LiteralList):
             return Literal(BUILT_IN_LIST, [self.visit_expr_or(e).value for e in node.elems])
-
-BUILT_IN_CLASS = Type('class', dict())
-BUILT_IN_FUNC = Type('function', dict())
-BUILT_IN_OBJECT = Type('object', {
-    'to_str': Variable('to_str', BUILT_IN_FUNC, lambda a: str(a)),
-})
-BUILT_IN_INT = Type('int', {
-    '_add': Variable('_add', BUILT_IN_FUNC, lambda a, b: a.value+b.value),
-    '_sub': Variable('_sub', BUILT_IN_FUNC, lambda a, b: a.value-b.value),
-    '_mul': Variable('_mul', BUILT_IN_FUNC, lambda a, b: a.value*b.value),
-    '_div': Variable('_div', BUILT_IN_FUNC, lambda a, b: a.value/b.value),
-    '_mod': Variable('_mod', BUILT_IN_FUNC, lambda a, b: a.value%b.value),
-    '_pow': Variable('_pow', BUILT_IN_FUNC, lambda a, b: a.value**b.value)
-}, BUILT_IN_OBJECT)
-BUILT_IN_STRING = Type('string', {
-    '_add': Variable('_add', BUILT_IN_FUNC, lambda a, b: a.value+b.value)
-}, BUILT_IN_OBJECT)
-BUILT_IN_BOOL = Type('bool', {
-    '_or': Variable('_or', BUILT_IN_FUNC, lambda a, b: a.value or b.value)
-}, BUILT_IN_OBJECT)
-BUILT_IN_TUPLE = Type('tuple', {
-    'get': Variable('get', BUILT_IN_FUNC, lambda a, b: a.value[b.value])  # TODO: get 함수 구현
-}, BUILT_IN_OBJECT)
-BUILT_IN_LIST = Type('list', {
-    'get': Variable('get', BUILT_IN_FUNC, lambda a, b: a.value[b.value])  # TODO: get 함수 구현
-}, BUILT_IN_OBJECT)
-
-GLOBAL_VARIABLES = [
-    Type('system', {
-        'print': Variable('print', BUILT_IN_FUNC, lambda a: print(a.value))
-    }, BUILT_IN_OBJECT)
-]
-
-
-def execute(code):
-    from parse.builder import parse
-    m = SimpleMachine(GLOBAL_VARIABLES)
-    m.execute(parse(code))
-    return m
-
-
-def main(code):
-    execute(code)
-
-if __name__ == '__main__':
-    c = '''
-    system.print("str".to_str());
-    '''
-    main(c)
