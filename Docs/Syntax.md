@@ -9,6 +9,7 @@
         - [String](#string)
     - [Variable](#variable)
     - [Function](#function)
+    - [Comment](#comment)
 
 <!-- /TOC -->
 # Syntax
@@ -40,20 +41,17 @@ print "Lorem ipsum"
 print "아무말 대잔치 만쉐이"
 ```
 ## Variable
-변수는 `def (변수명) (값)` 으로 선언합니다.
+변수는 `(변수명) = (값)` 으로 선언, 대입합니다.
 ```
-def a 1
-def b (plus a 2)
-```
-값 대입은 `set (변수명) (값)` 으로 대입합니다.
-```
-set a (plus a 1)
+a = 1
+b = (plus a 2)
+b = (plus a b)
 ```
 ## Function
-함수 선언은 `def (함수 형태) (작동)` 꼴로 작동합니다.
+함수 선언도 변수 선언과 다른게 없습니다.
 ```
-def (plus1 a) (plus a 1)
-print plus1 a
+plus1 a = plus a 1
+print (plus1 a)
 ```
 ## Comment
 인라인 주석은 `//` 을 사용합니다.
