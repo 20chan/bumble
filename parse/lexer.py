@@ -1,4 +1,4 @@
-from parse.tok import *
+from parse.tok import Token, TokenType
 
 
 def decode_escape(char: str) -> str:
@@ -29,27 +29,26 @@ def parse_token(code: str, index=0) -> (Token, int):
     current = code[index:]
     cur = current[0]
 
-    if cur is '/':
+    if cur == '/':
         return parse_comment(current)
     if cur in ' \r\n\t':
         return Token(cur, TokenType.NONE), 1
-    if cur is '"':
+    if cur == '"':
         return parse_string(current)
+    if cur == "'":
+        return parse_char(current)
     if str.isdigit(cur):
         return parse_number(current)
-    if cur in operator_unit:
+    if cur in ['true', 'false']:
+        return parse_bool(current)
+    if cur in '()=':
         return parse_operator(current)
-    if cur in separators:
-        return parse_separator(current)
     return parse_identifier(current)
 
 
 def parse_comment(code: str) -> (Token, int):
     code_value = code[1]
     i = 0
-
-    if code_value not in '/*':
-        return parse_operator(code)
 
     if code_value == '/':
         i = 2
@@ -82,6 +81,10 @@ def parse_string(code: str) -> (Token, int):
     return Token(res, TokenType.STRING), i+1
 
 
+def parse_char(code: str) -> (Token, int):
+    return Token(code[1], TokenType.CHAR), 3
+
+
 def parse_number(code: str) -> (Token, int):
     result_type = TokenType.INTEGER
 
@@ -98,54 +101,28 @@ def parse_number(code: str) -> (Token, int):
     return Token(code[:i], result_type), i
 
 
+def parse_bool(code: str) -> (Token, int):
+    if code.startswith('true'):
+        return Token('true', TokenType.TRUE), 4
+    else:
+        return Token('false', TokenType.FALSE), 5
+
+
 def parse_operator(code: str) -> (Token, int):
-    if code[0] == ':' and code[1] != '=':
-        return parse_separator(code)
-
-    i = 0
-    while code[i] in operator_unit:
-        i += 1
-
-    # code[i]가 operator가 아니므로 i+1이 아닌 i를 리턴
-    return Token(code[:i], TokenType.OPERATOR), i
-
-
-def parse_separator(code: str) -> (Token, int):
-    return Token(code[0], TokenType.SEPARATOR), 1
+    if code[0] == '(':
+        return Token('(', TokenType.LBRAKET), 1
+    elif code[0] == ')':
+        return Token(')', TokenType.RBRAKET), 1
+    else:
+        return Token('=', TokenType.EQUAL), 1
 
 
 def parse_identifier(code: str) -> (Token, int):
     i = 0
-    while not Token.is_split_char(code[i]):
+    while i < len(code) and not Token.is_split_char(code[i]):
         i += 1
 
-    if code[:i] not in keywords:
-        return Token(code[:i], TokenType.IDENTIFIER), i
-
-    syntax = code[:i]
-    state_token = {
-        'import': TokenType.IMPORT,
-        'as': TokenType.AS,
-        'if': TokenType.IF,
-        'else': TokenType.ELSE,
-        'match': TokenType.MATCH,
-        'cond': TokenType.COND,
-        'then': TokenType.THEN,
-        'in': TokenType.IN,
-        'while': TokenType.WHILE,
-        'return': TokenType.RETURN,
-        'yield': TokenType.YIELD,
-        'skip': TokenType.SKIP,
-        'break': TokenType.BREAK,
-        'var': TokenType.VAR,
-        'func': TokenType.FUNC,
-        'class': TokenType.CLASS,
-        'nothing': TokenType.NOTHING,
-        'true': TokenType.TRUE,
-        'false': TokenType.FALSE
-    }
-
-    return Token(syntax, state_token[syntax]), i
+    return Token(code[:i], TokenType.IDENTIFIER), i
 
 
 if __name__ == '__main__':

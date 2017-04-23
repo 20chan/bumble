@@ -1,10 +1,5 @@
 from enum import Enum
 
-separators = '.,:;[]{}()'
-operator_unit = ':=+-*/%^&$|<>!'
-keywords = ['var', 'func', 'import', 'if', 'else', 'cond', 'then', 'match', 'while', 'for', 'in'
-            'return', 'yield', 'skip', 'break', 'nothing', 'true', 'false']
-
 
 class Token:
 
@@ -18,9 +13,7 @@ class Token:
 
     @staticmethod
     def is_split_char(char):
-        return char in separators or \
-            char in operator_unit or \
-            char in ' \r\n\t'
+        return char in ' \r\n\t()='
 
 
 class TokenType(Enum):
@@ -30,33 +23,10 @@ class TokenType(Enum):
     INTEGER = 2
     REAL = 3
     STRING = 4
-    TRUE = 5
-    FALSE = 6
-    SEPARATOR = 7
-    OPERATOR = 8
-    IDENTIFIER = 9
-    IF = 10
-    ELSE = 11
-    ELSEIF = 12
-    COND = 13
-    MATCH = 14
-    WHILE = 15
-    FOR = 16
-    RETURN = 17
-    YIELD = 18
-    SKIP = 19
-    BREAK = 20
-    VAR = 21
-    FUNC = 22
-    CLASS = 23
-    CALL = 24
-    BIND = 25
-    NOTHING = 26
-    THEN = 27
-    IN = 28
-    TRY = 29
-    CATCH = 30
-    FINALLY = 31
-    ENUM = 32
-    IMPORT = 33
-    AS = 34
+    CHAR = 5
+    TRUE = 6
+    FALSE = 7
+    IDENTIFIER = 8
+    LBRAKET = 9
+    RBRAKET = 10
+    EQUAL = 11
