@@ -1,18 +1,13 @@
-<!-- TOC -->
-
-- [Syntax](#syntax)
-    - [Literal](#literal)
-        - [Integer](#integer)
-        - [Real](#real)
-        - [Boolean](#boolean)
-        - [Character](#character)
-        - [String](#string)
-    - [Variable](#variable)
-    - [Function](#function)
-    - [Comment](#comment)
-
-<!-- /TOC -->
 # Syntax
+- [Literal](#literal)
+    - [Integer](#integer)
+    - [Real](#real)
+    - [Boolean](#boolean)
+    - [Character](#character)
+    - [String](#string)
+- [Variable](#variable)
+- [Function](#function)
+- [Comment](#comment)
 ## Literal
 ### Integer
 ```
