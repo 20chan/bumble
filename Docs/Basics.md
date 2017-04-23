@@ -16,9 +16,9 @@
 ### Integers
 2진수, 8진수, 16진수를 지원합니다.
 ```python
-print(0b0101001);
-print(0o01276);
-print(0xffffff);
+print 0b0101001
+print 0o01276
+print 0xffffff
 ```
 ### Floats
 실수는 64비트 double을 사용합니다. 근데 왜 헤더는 float일까 꺄르륵
