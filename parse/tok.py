@@ -34,3 +34,4 @@ class TokenType(Enum):
     LBRAKET = 9
     RBRAKET = 10
     EQUAL = 11
+    COMMA = 12

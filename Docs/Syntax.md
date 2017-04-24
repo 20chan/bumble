@@ -11,41 +11,41 @@
 ## Literal
 ### Integer
 ```
-print 0b0101001
-print 0o01276
+print 0b0101001,
+print 0o01276,
 print 0xffffff
 ```
 ### Real
 ```
-print 3.14159265
+print 3.14159265,
 print .99999999
 ```
 ### Boolean
 ```
-print true
+print true,
 print false
 ```
 ### Character
 ```
-print 'c'
+print 'c',
 print '뷁'
 ```
 ### String
 ```
-print "Lorem ipsum"
+print "Lorem ipsum",
 print "아무말 대잔치 만쉐이"
 ```
 ## Variable
 변수는 `(변수명) = (값)` 으로 선언, 대입합니다.
 ```
-a = 1
-b = (plus a 2)
+a = 1,
+b = (plus a 2),
 b = (plus a b)
 ```
 ## Function
 함수 선언도 변수 선언과 다른게 없습니다.
 ```
-plus1 a = plus a 1
+plus1 a = plus a 1,
 print (plus1 a)
 ```
 ## Comment
@@ -57,3 +57,5 @@ print (plus 1 2) // 2
 ```
 print /* 요기에 출력할걸 넣으세욤~~~ */ "Like THIS"
 ```
+## Sentence
+명령들의 구분은 콤마 `,`을 사용합니다.

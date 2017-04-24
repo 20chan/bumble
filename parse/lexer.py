@@ -41,7 +41,7 @@ def parse_token(code: str, index=0) -> (Token, int):
         return parse_number(current)
     if cur in ['true', 'false']:
         return parse_bool(current)
-    if cur in '()=':
+    if cur in '()=,':
         return parse_operator(current)
     return parse_identifier(current)
 
@@ -113,8 +113,10 @@ def parse_operator(code: str) -> (Token, int):
         return Token('(', TokenType.LBRAKET), 1
     elif code[0] == ')':
         return Token(')', TokenType.RBRAKET), 1
-    else:
+    elif code[0] == '=':
         return Token('=', TokenType.EQUAL), 1
+    else:
+        return Token(',', TokenType.COMMA), 1
 
 
 def parse_identifier(code: str) -> (Token, int):
