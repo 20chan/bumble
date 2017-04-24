@@ -15,6 +15,10 @@ class Token:
     def is_split_char(char):
         return char in ' \r\n\t()='
 
+    def is_literal(self):
+        return self.type in\
+               [TokenType.INTEGER, TokenType.REAL, TokenType.STRING, TokenType.CHAR, TokenType.TRUE, TokenType.FALSE]
+
 
 class TokenType(Enum):
     ERROR = -1
