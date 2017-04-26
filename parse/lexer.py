@@ -2,7 +2,7 @@ from parse.tok import Token, TokenType
 
 
 def decode_escape(char: str) -> str:
-    switch_map = {
+    return {
         '\\': '\\',
         'n': '\n',
         't': '\t',
@@ -10,9 +10,7 @@ def decode_escape(char: str) -> str:
         '\'': '\'',
         '"':  '"',
         '0': '\0'
-    }
-
-    return switch_map.get(char)
+    }[char]
 
 
 def tokenize(code: str):

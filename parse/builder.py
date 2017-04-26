@@ -63,6 +63,10 @@ class Builder:
         return Node.Literal(self.pop())
 
 
+def parse(code):
+    return Builder(code).parse()
+
+
 def main():
     b = Builder(open('code.txt', encoding='utf-8').read())
     res = b.parse()
