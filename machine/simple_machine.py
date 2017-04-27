@@ -166,8 +166,10 @@ class SimpleMachine(BasicMachine):
 
 def main():
     machine = SimpleMachine('''
-        a = 1,
-        print a
+        a = "!",
+        b = 1,
+        print a,
+        print b
         ''')
     machine.run()
     print('ran!')

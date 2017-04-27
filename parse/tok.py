@@ -13,7 +13,7 @@ class Token:
 
     @staticmethod
     def is_split_char(char):
-        return char in ' \r\n\t()='
+        return char in ' \r\n\t()=,'
 
     def is_literal(self):
         return self.type in\
