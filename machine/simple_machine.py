@@ -15,6 +15,7 @@ _ = Wildcard()
 class SymbolTable:
     BUILT_IN_FUNCTIONS = {
         'print': [((_,), lambda obj: print(obj))],
+        'plus': [((_, _), lambda a, b: a+b)]
     }
 
     def __init__(self, machine: "SimpleMachine", parent=None, args: List[Tuple]=None):
@@ -62,7 +63,7 @@ class SymbolTable:
             elif isinstance(param, Node.Literal):
                 pattern_params.append(self.machine.visit_literal(param))
 
-        def function(*params): return self.machine.visit(value)
+        def function(*params): return self.machine.visit(value)()
         self._add(name, pattern_params, function)
 
     @staticmethod
@@ -146,17 +147,17 @@ class SimpleMachine(BasicMachine):
 
     def visit_literal(self, node: Node.Literal):
         if node.type == TokenType.INTEGER:
-            return int(node.tok)
+            return lambda *params: int(node.tok)
         if node.type == TokenType.REAL:
-            return float(node.tok)
+            return lambda *params: float(node.tok)
         if node.type == TokenType.STRING:
-            return str(node.tok)
+            return lambda *params: str(node.tok)
         if node.type == TokenType.CHAR:
-            return str(node.tok)
+            return lambda *params: str(node.tok)
         if node.type == TokenType.TRUE:
-            return True
+            return lambda *params: True
         if node.type == TokenType.FALSE:
-            return False
+            return lambda *params: False
 
         raise TypeError
 
@@ -166,10 +167,8 @@ class SimpleMachine(BasicMachine):
 
 def main():
     machine = SimpleMachine('''
-        a = "!",
-        b = 1,
-        print a,
-        print b
+        a = plus 1 1,
+        print a
         ''')
     machine.run()
     print('ran!')
