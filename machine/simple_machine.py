@@ -39,10 +39,12 @@ class SymbolTable:
     @staticmethod
     def is_match(pattern, params):
         matched = True
+        i = 0
         for pat_cond in pattern:  # 패턴이 매칭되는지 확인
             if not (pat_cond == _ or pat_cond == params[i]):
                 matched = False
                 break
+            i += 1
         return matched
 
     def get(self, name, *params):
