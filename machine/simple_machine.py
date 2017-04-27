@@ -6,6 +6,12 @@ from typing import Dict, Tuple
 from types import FunctionType
 
 
+class Wildcard:
+    pass
+
+_ = Wildcard()
+
+
 class SymbolTable:
     def __init__(self, machine: SimpleMachine):
         self._patterns: Dict[str, Tuple[Tuple, FunctionType]] = {}
@@ -30,18 +36,40 @@ class SymbolTable:
         tok = var.params[0].tok
         raise NotImplementedError
 
+    @staticmethod
+    def is_match(pattern, params):
+        matched = True
+        for pat_cond in pattern:  # 패턴이 매칭되는지 확인
+            if not (pat_cond == _ or pat_cond == params[i]):
+                matched = False
+                break
+        return matched
+
     def get(self, name, *params):
-        f = self._patterns[name]
+        patts = self._patterns[name]
         if len(params) == 0:
-            if len(f) == 0:
-                return f[0][1]()
+            if len(patts) == 0:
+                return patts[0][1]()
             else:
-                raise TypeError('매개변수 개수가 달라')
-        ps = [self.machine.visit(p) for p in params]
-        for pt in (p[0] for p in f):
-            # TODO: 패턴매칭 구현
-            pass
-        raise NotImplementedError
+                def inner(*inner_params):
+                    return patts[0][1](*inner_params)
+                return inner
+        params_val = [self.machine.visit(p) for p in params]
+        i = -1
+        for pat in patts:
+            i += 1
+            if len(pat[0]) < len(params):
+                continue
+            if len(pat[0]) == len(params):
+                if SymbolTable.is_match(pat[0], params_val):
+                    return patts[i][1](*params)
+            if len(pat[0]) < len(params):
+                if SymbolTable.is_match(pat[0][:len(params)], params_val):
+                    def inner(*inner_params):
+                        return pat[1](*params_val, *inner_params)
+                    return inner
+
+        raise TypeError('매치되는 타입이 없음')
 
 
 class SimpleMachine(BasicMachine):
