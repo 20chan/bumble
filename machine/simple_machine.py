@@ -13,10 +13,6 @@ _ = Wildcard()
 
 
 class SymbolTable:
-    BUILT_IN_FUNCTIONS = {
-        'print': [((_,), lambda obj: print(obj))],
-        'plus': [((_, _), lambda a, b: a+b)]
-    }
 
     def __init__(self, machine: "SimpleMachine", parent=None, args: List[Tuple]=None):
         self._patterns: Dict[str, List[Tuple[Tuple, FunctionType]]] = {}
@@ -37,7 +33,7 @@ class SymbolTable:
         """
         self.machine = machine
 
-        self._parent = parent
+        self.parent = parent
         if parent is None:
             self.init_built_ins()
         if args is not None:
@@ -45,8 +41,14 @@ class SymbolTable:
                 self._add(arg[0], None, arg[1])
 
     def init_built_ins(self):
-        for key in SymbolTable.BUILT_IN_FUNCTIONS.keys():
-            self._patterns[key] = SymbolTable.BUILT_IN_FUNCTIONS[key]
+        # 아무래도 테이블 구조를 바꿔야 겠음. 함수가 아닌 노드로 값을 바꿔야 더 유연해질 거 같음
+        builtin_functions = {
+            'print': [((_,), lambda obj: print(obj))],
+            'plus': [((_, _), lambda a, b: a+b)],
+             # 'define': [((_, _), lambda val, var: )]
+        }
+        for key in builtin_functions.keys():
+            self._patterns[key] = builtin_functions[key]
 
     def _add(self, name, pat, function):
         if name in self._patterns:
@@ -104,8 +106,8 @@ class SymbolTable:
                             return pat[1](*params_val, *inner_params)
                         return inner
 
-        if self._parent is not None:
-            return self._parent.get(name, *params)
+        if self.parent is not None:
+            return self.parent.get(name, *params)
 
         raise TypeError('매칭되는 타입이 없음')
 
@@ -133,9 +135,14 @@ class SimpleMachine(BasicMachine):
         self._table.add_node(node.var, node.val)
 
     def visit_function(self, node: Node.FunctionNode):
+        # TODO: 테이블에서 로컬 변수 가져오기
+        # (NOW WORKING NOW)
         args = [(p, self.visit(p)) for p in node.params[1:]]
-        scoped = SymbolTable(self, self._table, args)
-        return scoped.get(node.params[0].tok, node.params[1:])
+        self._table = SymbolTable(self, self._table, args)
+
+        res = self._table.get(node.params[0].tok, node.params[1:])
+        self._table = self._table.parent
+        return res
 
     def visit_value(self, node: Node.ValueNode):
         if isinstance(node, Node.Literal):
@@ -167,8 +174,8 @@ class SimpleMachine(BasicMachine):
 
 def main():
     machine = SimpleMachine('''
-        a = plus 1 1,
-        print a
+        plus1 a = plus 1 a,
+        print (plus1 10)
         ''')
     machine.run()
     print('ran!')
