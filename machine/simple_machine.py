@@ -13,7 +13,7 @@ _ = Wildcard()
 
 
 class SymbolTable:
-    def __init__(self, machine: SimpleMachine):
+    def __init__(self, machine: SimpleMachine, parent=None, args=None):
         self._patterns: Dict[str, Tuple[Tuple, FunctionType]] = {}
         """
         프로시저들의 패턴매칭을 위한 테이블.
@@ -32,6 +32,11 @@ class SymbolTable:
         """
         self.machine = machine
 
+        self._parent = parent
+        if args is not None:
+            for arg in args:
+                self.add_node(arg.var, arg.val)
+
     def _add(self, name, pat, function):
         self._patterns[name] = pat, function
 
@@ -43,13 +48,9 @@ class SymbolTable:
                 pattern_params.append(_)
             elif isinstance(param, Node.Literal):
                 pattern_params.append(self.machine.visit_literal(param))
-        function = None
-        if isinstance(value, Node.Literal) or isinstance(value, Node.Identifier):
-            function = lambda *params: self.machine.visit(value)
-        elif isinstance(value, Node.FunctionNode):
-            # 이거 아님;; 변수 스코프 잘 해야됨
-            function = lambda *params: self.machine.visit(value)
-        self._add(name, pattern_params)
+
+        def function(*params): return self.machine.visit(value)
+        self._add(name, pattern_params, function)
 
     @staticmethod
     def is_match(pattern, params):
@@ -86,7 +87,10 @@ class SymbolTable:
                         return pat[1](*params_val, *inner_params)
                     return inner
 
-        raise TypeError('매치되는 타입이 없음')
+        if self._parent is not None:
+            return self._parent.get(name, *params)
+
+        raise TypeError('매칭되는 타입이 없음')
 
 
 class SimpleMachine(BasicMachine):
@@ -111,7 +115,8 @@ class SimpleMachine(BasicMachine):
         self._table.add_node(node.var, node.val)
 
     def visit_function(self, node: Node.FunctionNode):
-        return self._table.get(node.params[0], node.params[1:])
+        scoped = SymbolTable(self, self._table, node.params[1:])
+        return scoped.get(node.params[0], node.params[1:])
 
     def visit_value(self, node: Node.ValueNode):
         if isinstance(node, Node.Literal):
