@@ -1,3 +1,1 @@
-a = "Like",
-a = (plus a (capitalize "this") 123 "11" true),
-print /* 요기에 출력할걸 넣으세욤~~~ */ a
+println str = (print (plus str "\n"))
