@@ -31,7 +31,8 @@ class TokenType(Enum):
     TRUE = 6
     FALSE = 7
     IDENTIFIER = 8
-    LBRAKET = 9
-    RBRAKET = 10
-    EQUAL = 11
-    COMMA = 12
+    WILDCARD = 9
+    LBRAKET = 10
+    RBRAKET = 11
+    EQUAL = 12
+    COMMA = 13

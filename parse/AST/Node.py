@@ -35,3 +35,7 @@ class Literal(ValueNode):
 class Identifier(ValueNode):
     def __init__(self, tok: str):
         self.tok = tok
+
+
+class WildCard(ValueNode):
+    pass

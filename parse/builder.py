@@ -41,6 +41,8 @@ class Builder:
         return l
 
     def parse_value(self) -> Node.ValueNode:
+        if self.top.code == '_':
+            return Node.WildCard()
         if self.top.is_literal():
             return self.parse_literal()
         return self.parse_function()

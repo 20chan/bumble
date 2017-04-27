@@ -32,9 +32,24 @@ class SymbolTable:
         """
         self.machine = machine
 
-    def add_node(self, var: Node.FunctionNode, value):
-        tok = var.params[0].tok
-        raise NotImplementedError
+    def _add(self, name, pat, function):
+        self._patterns[name] = pat, function
+
+    def add_node(self, var: Node.FunctionNode, value: Node.ValueNode):
+        name = var.params[0].tok
+        pattern_params = []
+        for param in var.params[1:]:
+            if isinstance(param, Node.Identifier) or isinstance(param, Node.WildCard):
+                pattern_params.append(_)
+            elif isinstance(param, Node.Literal):
+                pattern_params.append(self.machine.visit_literal(param))
+        function = None
+        if isinstance(value, Node.Literal) or isinstance(value, Node.Identifier):
+            function = lambda *params: self.machine.visit(value)
+        elif isinstance(value, Node.FunctionNode):
+            # 이거 아님;; 변수 스코프 잘 해야됨
+            function = lambda *params: self.machine.visit(value)
+        self._add(name, pattern_params)
 
     @staticmethod
     def is_match(pattern, params):
@@ -62,10 +77,10 @@ class SymbolTable:
             i += 1
             if len(pat[0]) < len(params):
                 continue
-            if len(pat[0]) == len(params):
+            elif len(pat[0]) == len(params):
                 if SymbolTable.is_match(pat[0], params_val):
                     return patts[i][1](*params)
-            if len(pat[0]) < len(params):
+            elif len(pat[0]) > len(params):
                 if SymbolTable.is_match(pat[0][:len(params)], params_val):
                     def inner(*inner_params):
                         return pat[1](*params_val, *inner_params)
@@ -93,7 +108,7 @@ class SimpleMachine(BasicMachine):
     def visit_assign(self, node: Node.AssignNode):
         # define val var로 변경하는 신때틱 슈거이면 더 괜찮다고 생각.
         # 지금은 add과 set의 차이는 없지만, 나중에 설정해야 함.
-        self._table.add_node(node.var, self.visit(node.val))
+        self._table.add_node(node.var, node.val)
 
     def visit_function(self, node: Node.FunctionNode):
         return self._table.get(node.params[0], node.params[1:])
@@ -103,6 +118,8 @@ class SimpleMachine(BasicMachine):
             return self.visit_literal(node)
         elif isinstance(node, Node.Identifier):
             return self.visit_id(node)
+        elif isinstance(node, Node.WildCard):
+            return _
 
     def visit_literal(self, node: Node.Literal):
         if node.type == TokenType.INTEGER:
