@@ -2,7 +2,7 @@ from machine.basic_machine import BasicMachine
 from parse.builder import parse
 from parse.AST import Node
 from parse.tok import Token, TokenType
-from typing import Dict, Tuple
+from typing import Dict, Tuple, List
 from types import FunctionType
 
 
@@ -13,8 +13,12 @@ _ = Wildcard()
 
 
 class SymbolTable:
-    def __init__(self, machine: SimpleMachine, parent=None, args=None):
-        self._patterns: Dict[str, Tuple[Tuple, FunctionType]] = {}
+    BUILT_IN_FUNCTIONS = {
+        'print': [((_,), lambda obj: print(obj))],
+    }
+
+    def __init__(self, machine: "SimpleMachine", parent=None, args: List[Tuple]=None):
+        self._patterns: Dict[str, List[Tuple[Tuple, FunctionType]]] = {}
         """
         프로시저들의 패턴매칭을 위한 테이블.
         do a b = plus a b
@@ -33,12 +37,21 @@ class SymbolTable:
         self.machine = machine
 
         self._parent = parent
+        if parent is None:
+            self.init_built_ins()
         if args is not None:
             for arg in args:
-                self.add_node(arg.var, arg.val)
+                self._add(arg[0], None, arg[1])
+
+    def init_built_ins(self):
+        for key in SymbolTable.BUILT_IN_FUNCTIONS.keys():
+            self._patterns[key] = SymbolTable.BUILT_IN_FUNCTIONS[key]
 
     def _add(self, name, pat, function):
-        self._patterns[name] = pat, function
+        if name in self._patterns:
+            self._patterns[name].append((pat, function))
+        else:
+            self._patterns[name] = [(pat, function)]
 
     def add_node(self, var: Node.FunctionNode, value: Node.ValueNode):
         name = var.params[0].tok
@@ -64,28 +77,31 @@ class SymbolTable:
         return matched
 
     def get(self, name, *params):
-        patts = self._patterns[name]
-        if len(params) == 0:
-            if len(patts) == 0:
-                return patts[0][1]()
-            else:
-                def inner(*inner_params):
-                    return patts[0][1](*inner_params)
-                return inner
-        params_val = [self.machine.visit(p) for p in params]
-        i = -1
-        for pat in patts:
-            i += 1
-            if len(pat[0]) < len(params):
-                continue
-            elif len(pat[0]) == len(params):
-                if SymbolTable.is_match(pat[0], params_val):
-                    return patts[i][1](*params)
-            elif len(pat[0]) > len(params):
-                if SymbolTable.is_match(pat[0][:len(params)], params_val):
+        if name in self._patterns:
+            patts = self._patterns[name]
+            if patts[0] is None:
+                return patts[0][1](*params)
+            if len(params) == 0:
+                if len(patts) == 0:
+                    return patts[0][1]()
+                else:
                     def inner(*inner_params):
-                        return pat[1](*params_val, *inner_params)
+                        return patts[0][1](*inner_params)
                     return inner
+            params_val = [self.machine.visit(p)() for p in params[0]]
+            i = -1
+            for pat in patts:
+                i += 1
+                if len(pat[0]) < len(params):
+                    continue
+                elif len(pat[0]) == len(params):
+                    if SymbolTable.is_match(pat[0], params_val):
+                        return patts[i][1](*params_val)
+                elif len(pat[0]) > len(params):
+                    if SymbolTable.is_match(pat[0][:len(params)], params_val):
+                        def inner(*inner_params):
+                            return pat[1](*params_val, *inner_params)
+                        return inner
 
         if self._parent is not None:
             return self._parent.get(name, *params)
@@ -99,7 +115,8 @@ class SimpleMachine(BasicMachine):
         self._table = SymbolTable(self)
 
     def run(self):
-        self.visit(self.tree)
+        for node in self.tree.nodes:
+            self.visit(node)
 
     def visit(self, node: Node.Node):
         if isinstance(node, Node.FunctionNode):
@@ -115,8 +132,9 @@ class SimpleMachine(BasicMachine):
         self._table.add_node(node.var, node.val)
 
     def visit_function(self, node: Node.FunctionNode):
-        scoped = SymbolTable(self, self._table, node.params[1:])
-        return scoped.get(node.params[0], node.params[1:])
+        args = [(p, self.visit(p)) for p in node.params[1:]]
+        scoped = SymbolTable(self, self._table, args)
+        return scoped.get(node.params[0].tok, node.params[1:])
 
     def visit_value(self, node: Node.ValueNode):
         if isinstance(node, Node.Literal):
@@ -143,4 +161,16 @@ class SimpleMachine(BasicMachine):
         raise TypeError
 
     def visit_id(self, node: Node.Identifier):
-        return self._table.get(node.tok, [])
+        return self._table.get(node.tok)
+
+
+def main():
+    machine = SimpleMachine('''
+        a = 1,
+        print a
+        ''')
+    machine.run()
+    print('ran!')
+
+if __name__ == '__main__':
+    main()
