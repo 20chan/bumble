@@ -15,7 +15,7 @@ _ = Wildcard()
 class SymbolTable:
 
     def __init__(self, machine: "SimpleMachine", parent=None, args: List[Tuple]=None):
-        self._patterns: Dict[str, List[Tuple[Tuple, FunctionType]]] = {}
+        self._patterns: Dict[str, List[Tuple[Tuple, Node.ValueNode]]] = {}
         """
         프로시저들의 패턴매칭을 위한 테이블.
         do a b = plus a b
@@ -23,13 +23,16 @@ class SymbolTable:
         do a 2 = 2
         do 3 3 = 10 이라면
         _patterns['do'] = [
-            (1, _), lambda a, b: 1,
-            (_, 2), lambda a, b: 2,
-            (3, 3), lambda a, b: 10,
-            (_, _), lambda a, b: plus(a, b)
+            (1, _), Node.ValueNode,
+            (_, 2), Node.ValueNode,
+            (3, 3), Node.ValueNode,
+            (_, _), Node.ValueNode
         ]
         식으로 테이블에 저장되어야 하며, 순서는 함수의 선언 순서 그대로이다.
         호출시 탐색 순서는 차례대로가 된다.
+        
+        빌트인 함수는 callable 객체로 저장을 한다.
+        즉, callable하면 그냥 call하면 되고 노드이면 visit하면 됨
         """
         self.machine = machine
 
@@ -45,7 +48,6 @@ class SymbolTable:
         builtin_functions = {
             'print': [((_,), lambda obj: print(obj))],
             'plus': [((_, _), lambda a, b: a+b)],
-             # 'define': [((_, _), lambda val, var: )]
         }
         for key in builtin_functions.keys():
             self._patterns[key] = builtin_functions[key]
@@ -174,8 +176,8 @@ class SimpleMachine(BasicMachine):
 
 def main():
     machine = SimpleMachine('''
-        plus1 a = plus 1 a,
-        print (plus1 10)
+        define a 10
+        print a
         ''')
     machine.run()
     print('ran!')
