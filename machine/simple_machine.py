@@ -82,79 +82,48 @@ class SymbolTable:
         return matched
 
     def get(self, name, *params):
-        if name in self._patterns:
-            patts = self._patterns[name]
-            if patts[0] is None:
-                return patts[0][1](*params)
-            if len(params) == 0:
-                if len(patts) == 0:
-                    return patts[0][1]()
-                else:
-                    def inner(*inner_params):
-                        return patts[0][1](*inner_params)
-                    return inner
-            params_val = [self.machine.visit(p)() for p in params[0]]
-            i = -1
-            for pat in patts:
-                i += 1
-                if len(pat[0]) < len(params):
-                    continue
-                elif len(pat[0]) == len(params):
-                    if SymbolTable.is_match(pat[0], params_val):
-                        return patts[i][1](*params_val)
-                elif len(pat[0]) > len(params):
-                    if SymbolTable.is_match(pat[0][:len(params)], params_val):
-                        def inner(*inner_params):
-                            return pat[1](*params_val, *inner_params)
-                        return inner
-
-        if self.parent is not None:
-            return self.parent.get(name, *params)
-
-        raise TypeError('매칭되는 타입이 없음')
+        # 일단 커링은 생각하지 않고 만들어보자!
+        pass
 
 
 class SimpleMachine(BasicMachine):
     def __init__(self, code):
         self.tree = parse(code)
-        self._table = SymbolTable(self)
+        # self._table = SymbolTable(self)
 
     def run(self):
         for node in self.tree.nodes:
             self.visit(node)
 
-    def visit(self, node: Node.Node):
+    def visit(self, node: Node.Node, table: SymbolTable):
         if isinstance(node, Node.FunctionNode):
-            return self.visit_function(node)
+            return self.visit_function(node, table)
         if isinstance(node, Node.AssignNode):
-            self.visit_assign(node)
+            self.visit_assign(node, table)
         if isinstance(node, Node.ValueNode):
-            return self.visit_value(node)
+            return self.visit_value(node, table)
 
-    def visit_assign(self, node: Node.AssignNode):
+    def visit_assign(self, node: Node.AssignNode, table: SymbolTable):
         # define val var로 변경하는 신때틱 슈거이면 더 괜찮다고 생각.
         # 지금은 add과 set의 차이는 없지만, 나중에 설정해야 함.
-        self._table.add_node(node.var, node.val)
+        table.add_node(node.var, node.val)
 
-    def visit_function(self, node: Node.FunctionNode):
-        # TODO: 테이블에서 로컬 변수 가져오기
-        # (NOW WORKING NOW)
-        args = [(p, self.visit(p)) for p in node.params[1:]]
-        self._table = SymbolTable(self, self._table, args)
+    def visit_function(self, node: Node.FunctionNode, table: SymbolTable):
+        args = [(p, self.visit(p, table)) for p in node.params[1:]]
+        new_table = SymbolTable(self, table, args)
 
-        res = self._table.get(node.params[0].tok, node.params[1:])
-        self._table = self._table.parent
+        res = new_table.get(node.params[0].tok, node.params[1:])
         return res
 
-    def visit_value(self, node: Node.ValueNode):
+    def visit_value(self, node: Node.ValueNode, table: SymbolTable):
         if isinstance(node, Node.Literal):
-            return self.visit_literal(node)
+            return self.visit_literal(node, table)
         elif isinstance(node, Node.Identifier):
-            return self.visit_id(node)
+            return self.visit_id(node, table)
         elif isinstance(node, Node.WildCard):
             return _
 
-    def visit_literal(self, node: Node.Literal):
+    def visit_literal(self, node: Node.Literal, table: SymbolTable):
         if node.type == TokenType.INTEGER:
             return lambda *params: int(node.tok)
         if node.type == TokenType.REAL:
@@ -170,8 +139,8 @@ class SimpleMachine(BasicMachine):
 
         raise TypeError
 
-    def visit_id(self, node: Node.Identifier):
-        return self._table.get(node.tok)
+    def visit_id(self, node: Node.Identifier, table:SymbolTable):
+        return table.get(node.tok)
 
 
 def main():
