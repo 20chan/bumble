@@ -65,10 +65,9 @@ class SymbolTable:
             if isinstance(param, Node.Identifier) or isinstance(param, Node.WildCard):
                 pattern_params.append(_)
             elif isinstance(param, Node.Literal):
-                pattern_params.append(self.machine.visit_literal(param))
+                pattern_params.append(self.machine.visit_literal(param, self))
 
-        def function(*params): return self.machine.visit(value)()
-        self._add(name, pattern_params, function)
+        self._add(name, pattern_params, value)
 
     @staticmethod
     def is_match(pattern, params):
@@ -83,7 +82,9 @@ class SymbolTable:
 
     def get(self, name, *params):
         # 일단 커링은 생각하지 않고 만들어보자!
-        pass
+        if callable(self._patterns[name][0][1]):
+            return self._patterns[name][0][1](*params)
+        return self.machine.visit(self._patterns[name][0][1], self)
 
 
 class SimpleMachine(BasicMachine):
@@ -92,8 +93,9 @@ class SimpleMachine(BasicMachine):
         # self._table = SymbolTable(self)
 
     def run(self):
+        table = SymbolTable(self)
         for node in self.tree.nodes:
-            self.visit(node)
+            self.visit(node, table)
 
     def visit(self, node: Node.Node, table: SymbolTable):
         if isinstance(node, Node.FunctionNode):
@@ -109,10 +111,11 @@ class SimpleMachine(BasicMachine):
         table.add_node(node.var, node.val)
 
     def visit_function(self, node: Node.FunctionNode, table: SymbolTable):
-        args = [(p, self.visit(p, table)) for p in node.params[1:]]
-        new_table = SymbolTable(self, table, args)
-
-        res = new_table.get(node.params[0].tok, node.params[1:])
+        # name = node.params[0].tok
+        # args = [(p, self.visit(p, table)) for p in node.params[1:]]
+        # new_table = SymbolTable(self, table, args)
+        args = [self.visit(p, table) for p in node.params[1:]]
+        res = table.get(node.params[0].tok, *args)
         return res
 
     def visit_value(self, node: Node.ValueNode, table: SymbolTable):
@@ -125,27 +128,27 @@ class SimpleMachine(BasicMachine):
 
     def visit_literal(self, node: Node.Literal, table: SymbolTable):
         if node.type == TokenType.INTEGER:
-            return lambda *params: int(node.tok)
+            return int(node.tok)
         if node.type == TokenType.REAL:
-            return lambda *params: float(node.tok)
+            return float(node.tok)
         if node.type == TokenType.STRING:
-            return lambda *params: str(node.tok)
+            return str(node.tok)
         if node.type == TokenType.CHAR:
-            return lambda *params: str(node.tok)
+            return str(node.tok)
         if node.type == TokenType.TRUE:
-            return lambda *params: True
+            return True
         if node.type == TokenType.FALSE:
-            return lambda *params: False
+            return False
 
         raise TypeError
 
-    def visit_id(self, node: Node.Identifier, table:SymbolTable):
+    def visit_id(self, node: Node.Identifier, table: SymbolTable):
         return table.get(node.tok)
 
 
 def main():
     machine = SimpleMachine('''
-        define a 10
+        a = 1,
         print a
         ''')
     machine.run()
