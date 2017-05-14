@@ -6,3 +6,4 @@ from typing import Dict, Tuple, List
 from types import FunctionType
 
 # FUCK THIS ALL!
+# SUPER DUPER HYPER EXTREME HARDCORE CODING
